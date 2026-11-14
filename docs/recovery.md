@@ -6,8 +6,7 @@
 
 The recovery source is the complete community BK7231N stock firmware image from another Evolve projector, **not an ESPHome UF2** and **not a backup of this exact projector**.
 
-- Private source repository: `Tooelite/bliss-evolve-android`
-- Archive: `firmware/references/evolve-reference-firmware-bk7231n-v1.0.tar.gz`
+- Source: a locally archived full-device community dump, originally published for a BK7231N Evolve projector. The archive path on the maintainer's system is deliberately not published here.
 - Original dump: `readResult_BK7231N_QIO_bliss_2023-14-6--12-56-58.bin`
 - Extract the binary locally as `firmware/recovery/recovery-image.bin` (never commit it to this public repository).
 - Required length: **2,097,152 bytes / 0x200000**.
@@ -17,7 +16,15 @@ The recovery source is the complete community BK7231N stock firmware image from 
 python3 scripts/check-image.py firmware/recovery/recovery-image.bin
 ```
 
-**STOP** if the checksum or length differs. This check establishes image identity **only**; it does not establish compatibility or permission to flash.
+**STOP** if the checksum or length differs. This check establishes image identity **only**; it does not establish that offsets 0–0x10FFF hold a valid bootloader, or that the dump is compatible with the target.
+
+**Mandatory read-only boot/layout evidence:**
+
+```bash
+bk7231tools dissect_dump firmware/recovery/recovery-image.bin
+```
+
+This analyzer can identify RBL containers such as `bootloader` and `app` when present. Verify that the expected bootloader and application regions are detected at plausible BK7231N offsets, cross-check the actual bytes and flash-partition map, and do not infer a valid bootloader from file size alone. Detection alone is not a complete proof of executable integrity. Keep the result as evidence before deciding what to write.
 
 ## 2. Reuse the successful UART transport and reset
 
@@ -43,38 +50,30 @@ Check the actual device and chip capacity **without writing**:
 
 Require chip **BK7231N** and flash size **2 MiB**. If those differ, STOP.
 
-## 3. Critical full-image decision – do not skip
+## 3. Critical bootloader and partition decision – do not skip
 
-The command below would replace **every sector, 0x000000–0x1FFFFF**. In particular:
+**We have not proved that the foreign BIN contains a valid bootloader.** A 2 MiB file may contain a full address-space dump without guaranteeing every region contains correct executable data. **Do not write the full file at chip address `0x000000` until bootloader bytes and complete addressing have been confirmed.**
 
-- `0x000000–0x010FFF`: bootloader. The existing own-device backup does **not** include it.
-- Other sectors: application, OTA, factory calibration, identity, storage and settings; exact original-device partition contents are not fully established.
-- This BIN comes from a **different** projector. Its identity and calibration data can be different, and its original firmware may rely on unavailable cloud services.
+- `0x000000–0x010FFF`: the existing, currently responding UART bootloader region. The own-device backups do **not** include it. Preserve this region by default.
+- Application region: determine the true start and end offsets from the foreign image and the existing BK7231N layout. The previously successful UF2 transfer began at `0x011000`; this is evidence of the earlier UF2 layout, **not** automatic proof of the foreign BIN's layout.
+- Remaining sectors: preserve the original unit's factory calibration, identity, storage and configuration wherever possible. The original backup has a separate main segment (1,953,792 bytes) and config segment (73,728 bytes); these sizes provide a reference, not an unconditional flash map approval.
+- If the foreign bootloader is absent, corrupt, nonstandard or unverified, **never** replace the working bootloader with it. If OEM application compatibility with that bootloader is uncertain, stop before the write.
 
-The own-device main and config backups exist separately in the private source repository. Preserving their data versus executing a full factory-image replacement must be an **explicit recovery decision**, not a side effect of an automatic script. Verify the UART bootloader remains accessible and that a recovery fallback is understood. **No write authorization is implied by this document.**
+**Do not shift data by 0x11000:** when selecting a partial raw-BIN write from a complete dump, the file skip offset `-S` and target flash start `-s` must refer to the **same original address**. Identify and approve the exact length and affected sectors, then preserve all unselected regions. Do not silently include device-specific configuration in the application write.
 
-## 4. Full-BIN flash over the same ltchiptool transport – command for review only
+## 4. Raw BIN over the same proven ltchiptool transport – no unreviewed full-chip write
 
-A raw flash image is **not** a UF2 package. The existing `ltchiptool flash write` implementation supports raw files when `-f/--family` **and** `-s/--start` are both supplied. That selects the raw path, writes the specified range using `BK7231Serial.program_flash`, and enables per-sector CRC checks through `-c`.
+A raw flash image is **not** a UF2 package. The existing `ltchiptool flash write` code supports raw-BIN input with explicit chip family (`-f bk7231n`), start address (`-s`) and optional input offset (`-S`) and length (`-l`). CRC verification (`-c`) is implemented in the existing writer.
 
-**Destructive: DO NOT execute until the image, wiring, bootloader/reset entry and full-chip replacement are explicitly approved.**
+**No complete `-s 0x000000 -l 0x200000` command is approved or recommended.** The archived 2 MiB image has not yet been analyzed for bootloader contents, and overwriting a responsive bootloader with unverified data could disable the UART recovery path.
 
-```bash
-cd ~/blisslight-evolve-esphome  # replace with the actual clone directory
-~/esphome-env/bin/ltchiptool flash write \
-  -d /dev/ttyUSB0 \
-  -f bk7231n \
-  -s 0x000000 \
-  -l 0x200000 \
-  -c \
-  firmware/recovery/recovery-image.bin
-```
+After the read-only analysis identifies a suitable app-only range, a reviewed write command must maintain **the original mapping:** file offset = target flash offset for a raw full dump. For example, if a region begins at `0x011000`, both `-s 0x011000` and `-S 0x011000` are needed, and `-l` must equal the specifically approved region length. This is an **illustration of address mapping, not a flash command or approval**. Never invent a range or blindly use the file's full 2 MiB length.
 
-This is the **full** 2 MiB write: file offset zero → chip address zero. **Do not substitute `-s 0x11000` without a matching `-S 0x11000` and a newly reviewed partial-flash plan.** No UF2 conversion, no automatically generated UF2 and no blind auto-detection.
+Do not modify, truncate, or repackage the source BIN to 'make' its offsets fit. No UF2 conversion is required; `ltchiptool` already supports raw files. A flash will only be considered after image layout, identity/config preservation, wiring and explicit authorization are established.
 
 The underlying BK7231N writer writes 4 KiB sectors, checks CRC on written sectors and retries failed 4 KiB writes up to three times in the examined implementation. If it reports an error or exits unsuccessfully, **STOP**; do not automatically repeat the entire 2 MiB flash. Empty (all-FF) sectors follow an erase-only path, which is not equivalent to independent byte-for-byte readback of the entire chip.
 
-Unlike the UF2 path, the inspected raw-write path does not automatically call the chip reboot routine. After a successful write, release any reset wiring, **manually reboot or safely power-cycle** the device and check that it boots.
+Unlike the UF2 path, the inspected raw-write path does not automatically call the chip reboot routine. After any **later authorized** write, release any reset wiring, **manually reboot or safely power-cycle** the device and check that it boots.
 
 ## 5. Recovery acceptance
 
