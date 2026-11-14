@@ -1,31 +1,11 @@
-# Recovery
+# Recovery steps
 
-## Prepare Linux
+1. Install Linux tools: `sudo apt-get install -y python3-venv python3-pip usbutils` and `bash scripts/setup-linux.sh`.
+2. Put the verified community binary at `firmware/recovery/recovery-image.bin`.
+3. Check it: `python3 scripts/check-image.py firmware/recovery/recovery-image.bin`.
+4. Configure and test the Waveshare FT232 as described in [wiring.md](wiring.md).
+5. Verify the actual projector UART pads, I/O voltage, power/reset procedure, image layout and device-specific flash regions **before any write**.
+6. Check the installed tool options with `.venv/bin/ltchiptool flash write --help`; use only a reviewed command and explicit authorization.
+7. After flashing, check boot, projector output, controls, Wi-Fi and power cycling.
 
-```bash
-sudo apt-get update
-sudo apt-get install -y python3-venv python3-pip usbutils
-bash scripts/setup-linux.sh
-```
-
-Check the installed flashing CLI with `.venv/bin/ltchiptool flash write --help`.
-
-## Verify image
-
-```bash
-python3 scripts/check-image.py firmware/recovery/recovery-image.bin
-```
-
-Expected: 2,097,152 bytes and SHA-256 `07a76fa01817d4924cebe72b3ebfe789a86bdb3c94418d7570baaf10e1b58da0`.
-
-## Connect adapter
-
-Follow [wiring.md](wiring.md). With the device disconnected, verify the FT232 adapter and Linux serial port. Confirm the chip responds to a read-only identification operation before attempting any write.
-
-## Flash
-
-**Not enabled.** First verify the image layout, protected/device-specific regions, flash offsets and tool input format. Obtain explicit authorization for writing. `scripts/recovery-flash.sh` currently validates the image and stops.
-
-## Validate
-
-After an authorized flash, check boot, projector output, buttons, motor, Wi-Fi and behavior after a power cycle. Save the serial log if anything fails.
+**Writing is not enabled:** no verified full-image write command or target-specific pinout is available yet.
