@@ -4,14 +4,12 @@
 
 **Disconnect the projector before configuring the adapter.**
 
-1. Adapter model: **Waveshare 6170 FT232 USB-UART, USB-A** (documented in source repository history). Check the PCB revision and its printed jumper labels against the corresponding Waveshare 6170 documentation before connecting. **FT232 and USB ID `0403:6001` identify the USB-UART chip, not the board model.** Do not use jumper positions or pin numbering from another model.
+1. Adapter model: **Waveshare 6170 FT232 USB-UART, USB-A**. Check the PCB revision and its printed jumper labels against the corresponding Waveshare 6170 documentation before connecting. **FT232 and USB ID `0403:6001` identify the USB-UART chip, not the board model.** Do not use jumper positions or pin numbering from another model.
 2. Set the adapter's **UART I/O voltage to 3.3 V** *only if the actual adapter provides a selectable 3.3 V logic level and the projector's UART level has been verified as 3.3 V*. On boards with separate VCC and VCCIO settings, the relevant setting is **VCCIO / UART logic**, not merely the supply output. If the jumper labels or measured logic voltage are uncertain, stop.
 3. Select **TTL UART**, not RS-232 voltage levels. Do not use 5 V UART logic on an unverified 3.3 V target.
 4. Leave **VCC, 3V3 and 5V supply outputs disconnected** from the projector until its power supply arrangement has been independently established.
 5. Use **TXD, RXD and GND** only. Hardware flow control **RTS/CTS is disabled**; do not connect RTS/CTS or DTR unless a verified boot/reset procedure requires them.
 6. Serial framing for the **adapter-only loopback**: **115200 baud, 8 data bits, no parity, 1 stop bit, no flow control (115200 8N1)**. The BK7231N bootloader flashing tool may choose its own baud rate; do not force the loopback rate onto flashing commands without checking the tool.
-
-The source repository records a working FT232 serial write path and USB ID `0403:6001`. **The model is Waveshare 6170; the PCB revision is not established by those records.** Until identified, adapter-specific jumper positions and numbered header diagrams must not be published as verified.
 
 ## 2. Connect the FT232 to Debian
 
@@ -24,7 +22,7 @@ ls -l /dev/ttyUSB*
 dmesg | tail -n 30
 ```
 
-The previously observed FTDI USB ID was `0403:6001`; the previously observed device was `/dev/ttyUSB0`. The actual device name may differ.
+The device path may differ from `/dev/ttyUSB0`.
 
 The Linux kernel driver is normally `ftdi_sio` via `usbserial`. Check it if the port is missing:
 
@@ -79,7 +77,7 @@ Use individual **2.54 mm Dupont leads** with the connector gender matching the a
 | **VCC / 3V3 / 5V** | Not connected | **Do not connect** |
 | **RTS / CTS / DTR** | Not connected | **Do not connect** |
 
-Connect by the labels on the actual adapter and the previously used projector UART connections, not by an assumed four-pin connector order. A physical pin-numbered drawing must be based on the actual hardware.
+Connect by verified signal labels, not by an assumed connector order. A physical pin-numbered drawing must be based on the actual hardware.
 
 The target is a BlissLights Evolve with a CBU/BK7231N and 2 MiB flash. Disconnect all power before attaching leads. Confirm a safe power/reset procedure before attempting a read-only bootloader handshake. **Do not flash until wiring and power are verified.**
 
