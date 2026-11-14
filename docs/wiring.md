@@ -79,15 +79,26 @@ Use individual **2.54 mm Dupont leads** with the connector gender matching the a
 
 Connect by verified signal labels, not by an assumed connector order. A physical pin-numbered drawing must be based on the actual hardware.
 
+**BK7231N-specific UART1:** TXD of the FT232 connects to **RX1/P10 (GPIO10)**; RXD of the FT232 connects to **TX1/P11 (GPIO11)**. The physical CBU pads must be positively identified on the actual projector; pin names alone do not establish the location of accessible test pads.
+
+**CEN/reset is essential for entering the download bootloader.** With safe 3.3 V UART logic and power already established, start the ltchiptool connect/flash-info command and **momentarily short the verified CEN/reset pad to GND, then release**. This resets the BK7231N while the serial loader is waiting. Do **not** permanently short CEN, randomly probe pads, bridge power rails, or infer CEN from an unverified photo. The proven manual procedure requires no FT232 RTS/CTS/DTR wiring. When link fails, stop and check the reset/power sequence rather than forcing writes.
+
 The target is a BlissLights Evolve with a CBU/BK7231N and 2 MiB flash. Disconnect all power before attaching leads. Confirm a safe power/reset procedure before attempting a read-only bootloader handshake. **Do not flash until wiring and power are verified.**
 
-## 5. Confirm the flashing tool
+## 5. Confirm the previously successful flashing tool
+
+Prefer the **same installed executable** used for the earlier successful UART write (not an unpinned, freshly installed substitute):
 
 ```bash
-bash scripts/setup-linux.sh
-.venv/bin/ltchiptool --help
-.venv/bin/ltchiptool flash --help
-.venv/bin/ltchiptool flash write --help
+~/esphome-env/bin/python -m pip show ltchiptool bk7231tools
+~/esphome-env/bin/ltchiptool flash write --help
+~/esphome-env/bin/ltchiptool flash info --help
 ```
 
-Use the installed tool's actual options for serial port, chip identification, reset timing and verification. **No write command is authorized by this document.**
+Once the projector is safely connected and the CEN reset procedure is understood, the **read-only identification** command is:
+
+```bash
+~/esphome-env/bin/ltchiptool flash info bk7231n -d /dev/ttyUSB0
+```
+
+Require BK7231N and 2 MiB. Do not post full chip-info logs publicly; they can include chip IDs or security-related data. The full **raw BIN** restore command and its destructive consequences are documented separately in [recovery.md](recovery.md). **No write command is authorized by this document.**
