@@ -6,4 +6,4 @@ SHA-256: `07a76fa01817d4924cebe72b3ebfe789a86bdb3c94418d7570baaf10e1b58da0`
 
 Check: `python3 scripts/check-image.py firmware/recovery/recovery-image.bin`
 
-Binary transfer pending.
+Source archive: `Tooelite/bliss-evolve-android/firmware/references/evolve-reference-firmware-bk7231n-v1.0.tar.gz`. The binary is not included here.
