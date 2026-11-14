@@ -1,6 +1,6 @@
 # BlissLights Evolve : Recovery
 
-BK7231N (2 MiB) recovery using a SHA-256-identified community firmware image and Waveshare FT232 USB-UART adapter.
+BK7231N (2 MiB) recovery using a SHA-256-identified community firmware image and Waveshare 6170 USB-UART adapter.
 
 ## Linux
 
