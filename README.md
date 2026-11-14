@@ -8,10 +8,10 @@
 
 1. Extract the known 2 MiB BIN locally, then run `python3 scripts/check-image.py firmware/recovery/recovery-image.bin`.
 2. Use the already proven `~/esphome-env/bin/ltchiptool` on Debian, the Waveshare 6170 FT232, verified RX1/TX1/GND wiring and the **CEN-to-GND reset sequence** to enter the BK7231N download mode.
-3. Confirm chip identification and flash size, then review the consequence of replacing **all 2 MiB** (including bootloader and device-specific regions).
-4. **Only after separate authorization:** write the raw BIN with explicit BK7231N family, start `0x0`, length `0x200000` and in-write CRC verification. Reboot manually after successful raw write; check stable device operation.
+3. **Before any write, inspect the actual contents and offsets of the 2 MiB dump**, including whether a valid bootloader region exists. The size and SHA-256 alone do not establish this. Use the existing read-only `bk7231tools dissect_dump` command.
+4. **Preferred recovery design:** preserve the already responding bootloader (`0x000000–0x010FFF`) and preserve own-device configuration wherever possible; write only identified stock application regions at their *original addresses*. The write range must be evidenced and approved before any command is run. Full-chip replacement is an exceptional, separately justified option.
 
-**No UF2 conversion required.** The same `ltchiptool flash write` CLI can accept UF2 or raw BIN; for raw BIN, use explicit `-f bk7231n -s 0x0` to select raw mode.
+**No UF2 conversion required.** The same `ltchiptool flash write` CLI supports UF2 and raw BIN. For raw BIN, explicit `-f bk7231n -s <validated-target-address>` selects raw mode; when restoring from a full-dump file, the matching input offset must also be supplied with `-S <validated-file-offset>`. **Never shift the firmware data into the wrong flash address.**
 
 The exact preparation, **non-writing chip-info command**, proposed full-flash command and stop conditions are in [docs/recovery.md](docs/recovery.md). Physical wiring and CEN reset: [docs/wiring.md](docs/wiring.md).
 
