@@ -21,7 +21,8 @@ def run(port: str, timeout: float) -> int:
         settings = termios.tcgetattr(fd)
         settings[0] = 0  # No input transformations
         settings[1] = 0  # No output transformations
-        settings[2] = termios.CS8 | termios.CREAD | termios.CLOCAL  # 8N1
+        settings[2] = termios.CS8 | termios.CREAD | termios.CLOCAL  # 8N1, no parity
+        settings[2] &= ~getattr(termios, 'CRTSCTS', 0)  # No RTS/CTS flow control
         settings[3] = 0  # Noncanonical, no echo
         settings[4] = termios.B115200
         settings[5] = termios.B115200
