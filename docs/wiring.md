@@ -11,7 +11,7 @@
 5. Use **TXD, RXD and GND** only. Hardware flow control **RTS/CTS is disabled**; do not connect RTS/CTS or DTR unless a verified boot/reset procedure requires them.
 6. Serial framing for the **adapter-only loopback**: **115200 baud, 8 data bits, no parity, 1 stop bit, no flow control (115200 8N1)**. The BK7231N bootloader flashing tool may choose its own baud rate; do not force the loopback rate onto flashing commands without checking the tool.
 
-**Waveshare model/revision and exact jumper positions remain unverified.** The USB identifier alone cannot identify the jumper layout.
+The FT232 serial interface and USB ID are documented in the source repository. The USB identifier does not establish the board's jumper layout.
 
 ## 2. Connect the FT232 to Debian
 
@@ -79,7 +79,7 @@ Use individual **2.54 mm Dupont leads** with the connector gender matching the a
 | **VCC / 3V3 / 5V** | : | **Do not connect** |
 | **RTS / CTS / DTR** | : | **Do not connect** |
 
-**Pin numbers and physical order are NOT established.** Do not assume a four-pin `VCC-RX-TX-GND` sequence or a universal Dupont housing orientation. The specific projector pads and Waveshare header orientation must be labeled using verified board photographs before the connection is made.
+Connect by the labels on the actual adapter and the previously used projector UART connections, not by an assumed four-pin connector order. A physical pin-numbered drawing must be based on the actual hardware.
 
 The target is a BlissLights Evolve with a CBU/BK7231N and 2 MiB flash. Disconnect all power before attaching leads. Confirm a safe power/reset procedure before attempting a read-only bootloader handshake. **Do not flash until wiring and power are verified.**
 
@@ -93,12 +93,3 @@ bash scripts/setup-linux.sh
 ```
 
 Use the installed tool's actual options for serial port, chip identification, reset timing and verification. **No write command is authorized by this document.**
-
-## Missing hardware evidence
-
-- Exact Waveshare FT232 model and selector/jumper labels
-- Verified PCB UART pad positions and board revision
-- Verified projector power/reset sequence
-- Labeled, compact pinout diagrams based on actual photographs
-
-These are prerequisites for a board-specific connection diagram, not reasons to guess the pin order.
