@@ -57,7 +57,7 @@ With the projector **disconnected**, temporarily connect the FT232 **TXD pin to 
 python3 scripts/waveshare-ft232-loopback.py --port /dev/ttyUSB0 --timeout 3
 ```
 
-The script sets **115200 8N1** and disables software flow control. Hardware flow control is not explicitly configured by the script; check the adapter's current settings if loopback fails. It sends `BLISS-WAVESHARE-LOOPBACK-12345`, and checks that exactly those bytes return.
+The script sets **115200 8N1** with software and RTS/CTS hardware flow control disabled. It sends `BLISS-WAVESHARE-LOOPBACK-12345`, and checks that exactly those bytes return.
 
 | Result | Meaning |
 |---|---|
