@@ -1,6 +1,6 @@
 # BlissLights Evolve : Recovery
 
-BK7231N (2 MiB) recovery using a verified community firmware image and Waveshare FT232 USB-UART adapter.
+BK7231N (2 MiB) recovery using a SHA-256-identified community firmware image and Waveshare FT232 USB-UART adapter.
 
 ## Linux
 
@@ -16,4 +16,4 @@ python3 scripts/waveshare-ft232-loopback.py --port /dev/ttyUSB0
 - [Recovery steps](docs/recovery.md)
 - [Troubleshooting](docs/troubleshooting.md)
 
-**Not ready to flash:** the binary is not yet in this repository; board-specific pad mapping, power/reset procedure and full-image flash layout remain unverified.
+**Recovery image is not in this repository. Do not flash a foreign full-device dump without reviewing its bootloader, configuration and device-specific regions.**
