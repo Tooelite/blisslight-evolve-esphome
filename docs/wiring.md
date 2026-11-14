@@ -4,14 +4,14 @@
 
 **Disconnect the projector before configuring the adapter.**
 
-1. Identify the exact Waveshare board revision and inspect the labels printed beside its voltage selector and UART header. **Do not infer a jumper position from a different FT232 model.**
+1. Read the **exact Waveshare model number and PCB revision** from the adapter itself. Record both before setting jumpers or connecting the projector. Match the model and revision against the corresponding Waveshare pinout and jumper documentation. **FT232 / FT232RL and USB ID `0403:6001` identify the USB-UART chip, not the Waveshare board model.** Do not use jumper positions or pin numbering from another model.
 2. Set the adapter's **UART I/O voltage to 3.3 V** *only if the actual adapter provides a selectable 3.3 V logic level and the projector's UART level has been verified as 3.3 V*. On boards with separate VCC and VCCIO settings, the relevant setting is **VCCIO / UART logic**, not merely the supply output. If the jumper labels or measured logic voltage are uncertain, stop.
 3. Select **TTL UART**, not RS-232 voltage levels. Do not use 5 V UART logic on an unverified 3.3 V target.
 4. Leave **VCC, 3V3 and 5V supply outputs disconnected** from the projector until its power supply arrangement has been independently established.
 5. Use **TXD, RXD and GND** only. Hardware flow control **RTS/CTS is disabled**; do not connect RTS/CTS or DTR unless a verified boot/reset procedure requires them.
 6. Serial framing for the **adapter-only loopback**: **115200 baud, 8 data bits, no parity, 1 stop bit, no flow control (115200 8N1)**. The BK7231N bootloader flashing tool may choose its own baud rate; do not force the loopback rate onto flashing commands without checking the tool.
 
-The source repository records a working FT232 serial write path and USB ID `0403:6001`. This does not identify the adapter's jumper layout.
+The source repository records a working FT232 serial write path and USB ID `0403:6001`. **The exact Waveshare board model and revision are not established by those records.** Until identified, adapter-specific jumper positions and numbered header diagrams must not be published as verified.
 
 ## 2. Connect the FT232 to Debian
 
