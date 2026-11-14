@@ -11,7 +11,7 @@
 5. Use **TXD, RXD and GND** only. Hardware flow control **RTS/CTS is disabled**; do not connect RTS/CTS or DTR unless a verified boot/reset procedure requires them.
 6. Serial framing for the **adapter-only loopback**: **115200 baud, 8 data bits, no parity, 1 stop bit, no flow control (115200 8N1)**. The BK7231N bootloader flashing tool may choose its own baud rate; do not force the loopback rate onto flashing commands without checking the tool.
 
-The FT232 serial interface and USB ID are documented in the source repository. The USB identifier does not establish the board's jumper layout.
+The source repository records a working FT232 serial write path and USB ID `0403:6001`. This does not identify the adapter's jumper layout.
 
 ## 2. Connect the FT232 to Debian
 
@@ -57,7 +57,7 @@ With the projector **disconnected**, temporarily connect the FT232 **TXD pin to 
 python3 scripts/waveshare-ft232-loopback.py --port /dev/ttyUSB0 --timeout 3
 ```
 
-The script sets **115200 8N1**, no flow control, sends `BLISS-WAVESHARE-LOOPBACK-12345`, and checks that exactly those bytes return.
+The script sets **115200 8N1** and disables software flow control. Hardware flow control is not explicitly configured by the script; check the adapter's current settings if loopback fails. It sends `BLISS-WAVESHARE-LOOPBACK-12345`, and checks that exactly those bytes return.
 
 | Result | Meaning |
 |---|---|
@@ -76,8 +76,8 @@ Use individual **2.54 mm Dupont leads** with the connector gender matching the a
 | **GND** | **GND** | Common ground |
 | **TXD (output)** | **RX (input)** | Crossed |
 | **RXD (input)** | **TX (output)** | Crossed |
-| **VCC / 3V3 / 5V** | : | **Do not connect** |
-| **RTS / CTS / DTR** | : | **Do not connect** |
+| **VCC / 3V3 / 5V** | Not connected | **Do not connect** |
+| **RTS / CTS / DTR** | Not connected | **Do not connect** |
 
 Connect by the labels on the actual adapter and the previously used projector UART connections, not by an assumed four-pin connector order. A physical pin-numbered drawing must be based on the actual hardware.
 
