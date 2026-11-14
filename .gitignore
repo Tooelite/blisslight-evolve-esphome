@@ -4,3 +4,8 @@ __pycache__/
 *.log
 *.bak
 *.tmp
+
+# Never publish recovered raw firmware or derived flash images.
+firmware/recovery/*.bin
+firmware/recovery/*.uf2
+firmware/recovery/*.rbl
