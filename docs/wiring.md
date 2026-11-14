@@ -1,4 +1,4 @@
-# Waveshare FT232 — serial setup and wiring (Debian)
+# Waveshare FT232 : serial setup and wiring (Debian)
 
 ## 1. Configure the FT232 adapter
 
@@ -65,7 +65,7 @@ The script sets **115200 8N1**, no flow control, sends `BLISS-WAVESHARE-LOOPBACK
 | `FAIL`, exit 1 | Received data differ or are missing |
 | Exit 2 | Port, permissions or OS error |
 
-Remove the TXD–RXD bridge before connecting the projector.
+Remove the TXD-RXD bridge before connecting the projector.
 
 ## 4. Dupont wiring to the projector
 
@@ -76,10 +76,10 @@ Use individual **2.54 mm Dupont leads** with the connector gender matching the a
 | **GND** | **GND** | Common ground |
 | **TXD (output)** | **RX (input)** | Crossed |
 | **RXD (input)** | **TX (output)** | Crossed |
-| **VCC / 3V3 / 5V** | — | **Do not connect** |
-| **RTS / CTS / DTR** | — | **Do not connect** |
+| **VCC / 3V3 / 5V** | : | **Do not connect** |
+| **RTS / CTS / DTR** | : | **Do not connect** |
 
-**Pin numbers and physical order are NOT established.** Do not assume a four-pin `VCC–RX–TX–GND` sequence or a universal Dupont housing orientation. The specific projector pads and Waveshare header orientation must be labeled using verified board photographs before the connection is made.
+**Pin numbers and physical order are NOT established.** Do not assume a four-pin `VCC-RX-TX-GND` sequence or a universal Dupont housing orientation. The specific projector pads and Waveshare header orientation must be labeled using verified board photographs before the connection is made.
 
 The target is a BlissLights Evolve with a CBU/BK7231N and 2 MiB flash. Disconnect all power before attaching leads. Confirm a safe power/reset procedure before attempting a read-only bootloader handshake. **Do not flash until wiring and power are verified.**
 
