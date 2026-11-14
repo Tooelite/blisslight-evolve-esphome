@@ -8,4 +8,4 @@
 6. Check the installed tool options with `.venv/bin/ltchiptool flash write --help`; use only a reviewed command and explicit authorization.
 7. After flashing, check boot, projector output, controls, Wi-Fi and power cycling.
 
-The source repository documents a successful UART write using `ltchiptool`, but this is not evidence that writing the entire foreign 2 MiB image is safe.
+A full-device dump from another projector may contain device-specific data. Review its flash regions before writing.
