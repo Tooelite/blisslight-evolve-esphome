@@ -1,6 +1,6 @@
 # Recovery A – vollständiger Evolve-Original-Fremddump
 
-**Archivdatei (zur Übernahme ins private Git):** `firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz`. **Status:** Noch nicht in diesem Repository vorhanden; die Übernahme erfolgt mit einem lokalen Git-Push.
+**Archivdatei (im privaten Git vorhanden):** `firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz`. **Status:** Übernommen in Commit `ef608ba7`; Git-Blob `c49af721f06ee05c6cc93f53f03b3334fd8b34be`.
 
 **Entpacktes RAW-BIN (nur lokal):** `firmware/recovery/recovery-image.bin`. Diese 2-MiB-Datei wird absichtlich nicht separat in Git abgelegt.
 

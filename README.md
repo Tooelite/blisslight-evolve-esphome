@@ -1,22 +1,22 @@
-# BlissLights Evolve – technische Reinschrift v1.1
+# BlissLights Evolve – technische Reinschrift v1.2
 
 **Gerät:** BlissLights Evolve SKY-EVOLVE-B-RCWB, Tuya CBU / BK7231N, 2 MiB Flash.
 
-Dieses Repository ist ab 15.11.2026 die **verbindliche, bereinigte Arbeitsgrundlage** für Wiederherstellung, ESPHome-Firmwarebau und Waveshare-FT232-Anschluss. Das frühere Repository `Tooelite/bliss-evolve-android` dient als **Quellen- und Belegarchiv** (historische Logs, eigene Teilbackups, fremder Firmwaredump), nicht mehr als maßgebliche Recovery-Anleitung. Kein Vermischen von alter Android-/Tuya-Forschung mit diesen Verfahren.
+Dieses Repository ist ab 15.11.2026 die **verbindliche, bereinigte Arbeitsgrundlage** für Wiederherstellung, ESPHome-Firmwarebau und Waveshare-FT232-Anschluss. Das frühere Repository `Tooelite/bliss-evolve-android` dient als **Quellen- und Belegarchiv** (historische Logs, eigene Teilbackups, fremder Firmwaredump), nicht mehr als maßgebliche Recovery-Anleitung. Kein Vermischen von alter Android-/Tuya-Forschung mit diesen Verfahren. **Übergang:** Der erste ESPHome-2024.4.1-Testbuild wird noch im lokalen alten Repository ausgeführt; die geprüfte Anleitung und spätere erfolgreiche Korrekturen werden hier verbindlich dokumentiert.
 
 ## Zwei getrennte Firmwarewege
 
 | Weg | Quelle | Zweck | Stand |
 | --- | --- | --- | --- |
 | **A · Original-Recovery** | Vollständiger 2-MiB-Community-BIN-Dump | Wiederherstellung der originalen Beken/Tuya-Firmware | BIN identifiziert, Bootloader-RBL geprüft, UART-Rohschreiben im Werkzeugcode belegt; **noch nicht am Gerät ausgeführt** |
-| **B · Eigene ESPHome-Firmware** | `firmware/esphome/galaxy-evolve-2024-v0.1.yaml` | Lokale RGBW-, Laser-, Motor- und Tastensteuerung | Quellstand gesichert; **ESPHome-2024.4.1-Build noch offen** |
+| **B · Eigene ESPHome-Firmware** | `firmware/esphome/galaxy-evolve-2024-v0.1.yaml` | Lokale RGBW-, Laser-, Motor- und Tastensteuerung | Quellstand gesichert; **englische, ausführbare Buildanleitung v1.2 vorhanden; lokaler Build noch offen** |
 
 Beide Wege verwenden denselben **Waveshare 6170 / FT232 → BK7231N UART1**-Zugang, manuelles CEN-Reset und `ltchiptool flash write -c`. Für **A** ist das Eingabeformat **RAW BIN** mit expliziten Adressen; für **B** ist es ein erst noch zu bauendes **UF2** mit dessen Mapping. **Nicht verwechseln.**
 
 ## Einzige aktuellen Anleitungen
 
 - [A – Recovery aus dem vollständigen Original-Fremddump](docs/recovery.md)
-- [B – ESPHome 2024.4.1 mit realen lokalen Secrets bauen](docs/build.md)
+- [B – ESPHome 2024.4.1: English build procedure, local secrets, validation, compile and UF2 QA](docs/build.md)
 - [Waveshare 6170: 3,3-V-UART, Verdrahtung, CEN/Reset und Debian](docs/wiring.md)
 - [Fehlerfälle](docs/troubleshooting.md)
 
@@ -28,7 +28,7 @@ Am 14.11.2026 wurde über FT232/UART ein anderes **ESPHome-2026-UF2** mit `ltchi
 
 **Zielgeräte-Backups:** Main `0x11000–0x1EDFFF` (1.953.792 B), Config `0x1EE000–0x1FFFFF` (73.728 B). Der eigene Bootloaderbereich `0x00000–0x10FFF` fehlt als Backup.
 
-**Archivierung:** Das Repository ist derzeit **privat**. Das Original-`tar.gz` soll unter `firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz` aus dem Forschungsrepository übernommen werden; bis zum manuellen Push liegt dort nur die README. Das extrahierte RAW-BIN bleibt außerhalb der Git-Historie. **Vor einer möglichen öffentlichen Freigabe** sind Urheber-/Weitergaberechte und gerätespezifische Daten des Fremddumps zu klären.
+**Archivierung:** Das Repository ist derzeit **privat**. Das unveränderte Original-`tar.gz` ist seit Commit `ef608ba7` unter `firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz` hinterlegt (1.637.617 Byte, Git-Blob `c49af721f06ee05c6cc93f53f03b3334fd8b34be`). Das extrahierte RAW-BIN bleibt außerhalb der Git-Historie. **Vor einer möglichen öffentlichen Freigabe** sind Urheber-/Weitergaberechte und gerätespezifische Daten des Fremddumps zu klären.
 
 **Flashrisiko:** Der geplante vollständige RAW-Restore überschreibt sämtliche 2 MiB **einschließlich Bootloader und gerätespezifischer Daten**. Ein solcher Write erfolgt ausschließlich nach expliziter Freigabe. Bisher weder Original-Recovery noch ESPHome-2024-Flash ausgeführt.
 
@@ -43,4 +43,5 @@ Die Quelle ist das [Elektroda-Forum zum BlissLights Evolve](https://www.elektrod
 ## Änderungsverlauf
 
 - **v1.0 (15.11.2026):** Zwei getrennte Firmwarewege, Quellen und Analysestand konsolidiert.
-- **v1.1 (15.11.2026):** Firmware-Spender und Community-Praxistest mit Quellen genannt; geplante Archivübernahme in das private Repository und die Bedeutung von `0xDEAC0` präzisiert.
+- **v1.1 (15.11.2026):** Firmware-Spender und Community-Praxistest mit Quellen genannt; Archivübernahme vorbereitet und Bedeutung von `0xDEAC0` präzisiert.
+- **v1.2 (15.11.2026):** Englische ausführbare ESPHome-2024.4.1-Buildanleitung mit isolierter Umgebung, echten lokalen Secrets, geschützten Logs, UF2-QS und Flashfreigabe festgehalten. Das vollständige Fremd-BIN-Archiv ist nachweislich in Git vorhanden; der lokale 2024er Build bleibt offen.
