@@ -1,6 +1,6 @@
 # Recovery A – vollständigen Evolve-Fremddump per FT232/UART zurückschreiben
 
-**Stand v1.0 · 15.11.2026.** Gewähltes Recovery-Medium ist **das komplette, unveränderte RAW-BIN (0x200000 Byte)** aus einem anderen Evolve-Gerät. Wir verwenden den am Zielgerät erfolgreichen **UART-Transport mit `ltchiptool`**, nicht OTA, Cloudcutter oder einen ungeprüften Web-/WLAN-Upload. **Der vollständige RAW-Flash wurde noch nicht durchgeführt.**
+**Stand v1.1 · 15.11.2026.** Gewähltes Recovery-Medium ist **das komplette, unveränderte RAW-BIN (0x200000 Byte)** aus einem anderen Evolve-Gerät. Wir verwenden den am Zielgerät erfolgreichen **UART-Transport mit `ltchiptool`**, nicht OTA, Cloudcutter oder einen ungeprüften Web-/WLAN-Upload. **Der vollständige RAW-Flash wurde noch nicht durchgeführt.**
 
 ## 1. Quellen- und Speicherbefund – abgeschlossen
 
@@ -16,28 +16,31 @@
 | Eigenes Config-Backup | `0x1EE000–0x1FFFFF` (Länge `0x12000`) |
 | Eigenes Boot-Backup | **Fehlt** (`0x000000–0x010FFF`) |
 
-Die beiden Parserläufe und der SHA-256-Abgleich wurden am 15.11.2026 auf Debian durchgeführt. Die identischen Ergebnisse trotz unterschiedlicher `ota_1`-/`ota_big`-App-Partitionslängen sind **kein Beleg für die genaue interne OTA-Aufteilung**. Für das gewählte komplette BIN-Image ist keine App-Teilsegmentierung nötig: **Datei-Offset 0 bis 0x1FFFFF entspricht Flashadresse 0 bis 0x1FFFFF.** Die Zahl `0xDEAC0` ist eine CRC-bereinigte App-Nutzdatenlänge und darf nicht als Flashlänge verwendet werden.
+Die beiden Parserläufe und der SHA-256-Abgleich wurden am 15.11.2026 auf Debian durchgeführt. Die identischen Ergebnisse trotz unterschiedlicher `ota_1`-/`ota_big`-App-Partitionslängen sind **kein Beleg für die genaue interne OTA-Aufteilung**. Für das gewählte komplette BIN-Image ist keine App-Teilsegmentierung nötig: **Datei-Offset 0 bis 0x1FFFFF entspricht Flashadresse 0 bis 0x1FFFFF.** Die Zahl `0xDEAC0` ist eine CRC-bereinigte App-Nutzdatenlänge, **keine physische Flash-Schreibbereichslänge**. Das betrifft nur eine unzulässige Extraktion/Teilübertragung. Für den gewählten vollständigen RAW-Restore bleibt die unveränderte BIN-Datei mit `-s 0x000000 -S 0x000000 -l 0x200000` maßgeblich. **Nicht kürzen, nicht verschieben, nicht die extrahierten App-Nutzdaten statt des vollständigen BIN verwenden.**
 
 Der gesamte BIN-Dump ist die Recovery-Quelle; weder wird die App herausgeschnitten noch wird aus ihm ein neues UF2 konstruiert. Der Bootloader-RBL ist strukturell intakt, seine tatsächliche Laufzeit auf unserem Evolve wurde **noch nicht getestet**.
 
-## 2. Lokale BIN-Datei – kein Firmwareupload ins Git
+## 2. Archiv aus dem Forschungsrepository übernehmen und BIN prüfen
 
-Referenzarchiv: `firmware/references/evolve-reference-firmware-bk7231n-v1.0.tar.gz` im historischen Repository `Tooelite/bliss-evolve-android`; Originaldateiname `readResult_BK7231N_QIO_bliss_2023-14-6--12-56-58.bin`. Das Archiv gehört in das Belegrepository, **nicht** in diese veröffentlichte Reinschrift.
+**Quelle:** [Dawk323, Elektroda-Beitrag #3 vom 17.06.2023](https://www.elektroda.com/rtvforum/topic3984240.html). Er stellte den vollständigen Original-BK7231N-Dump `readResult_BK7231N_QIO_bliss_2023-14-6--12-56-58.bin` bereit.
 
-Das Image wurde auf Debian bereits extrahiert und unter folgendem Pfad hashgeprüft:
+**Archiv im historischen Repository:** `Tooelite/bliss-evolve-android/firmware/references/evolve-reference-firmware-bk7231n-v1.0.tar.gz`.
 
-```text
-~/bliss-evolve-local/recovery-review/fremddump.bin
-```
+**Ziel im neuen privaten Repository:** `firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz` (bis zum lokalen Push noch nicht vorhanden).
 
-Aus der Wurzel dieses Recovery-Repositories:
+Archivgröße **1.637.617 Byte**, Archiv-SHA-256 **`2665124ef072fe579b4f38f85e39352cd08a35a0b71167b4706e0e39b40b6d37`**. Der unkomprimierte BIN-Inhalt hat die oben dokumentierte Größe und SHA-256. Die aktuelle `.gitignore` unterdrückt nur entpackte BIN-/UF2-/RBL-Dateien, nicht das `tar.gz`-Archiv.
+
+Nach dem manuellen Kopieren/Pushen des Archivs: Aus der Wurzel dieses Recovery-Repositories den **BIN-Inhalt unverändert** extrahieren und prüfen:
 
 ```bash
-cp ~/bliss-evolve-local/recovery-review/fremddump.bin firmware/recovery/recovery-image.bin
+tar -xOzf firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz \
+  --wildcards '*readResult_BK7231N_QIO_bliss_2023-14-6--12-56-58.bin' \
+  > firmware/recovery/recovery-image.bin
+
 python3 scripts/check-image.py firmware/recovery/recovery-image.bin
 ```
 
-Das Prüfskript kontrolliert **Größe und SHA-256 des gesamten BIN**; nur bei `PASS` fortfahren. `firmware/recovery/recovery-image.bin` wird von Git ignoriert. Keine zusätzlichen Checksum-Gates für die YAML.
+Das Prüfskript kontrolliert **Größe und SHA-256 des gesamten BIN**; nur bei `PASS` fortfahren. `firmware/recovery/recovery-image.bin` bleibt lokal und wird nicht committed. Das neue Repository ist derzeit privat; vor einer möglichen öffentlichen Freigabe sind Weitergaberechte sowie im Fremddump enthaltene Identitäts- oder Zugangsdaten zu prüfen. Keine zusätzlichen Checksum-Gates für die YAML.
 
 ## 3. Waveshare-UART und Bootloader-Einstieg
 
