@@ -49,6 +49,18 @@ Before each run, the script deletes **only its own previous `build-*` logs** fro
 | `build-<run-id>.review.log` | Automatically redacted review copy; inspect manually before sharing |
 | Per-phase logs | Installation, configuration, compilation and UF2 discovery |
 
+### Optional cleanup after a successful build
+
+After the UF2 candidates have been listed and hashed, the script asks:
+
+```text
+Remove temporary compiler files (*.o, *.d, *.a)? Firmware and logs will be kept. [yes/NO]:
+```
+
+Enter **`yes`** to remove only compiler object files, dependency files and static-library archives within the generated `firmware/esphome/.esphome/build/galaxy-lamp/` directory. Press **Enter** or enter anything else to retain them; `NO` is the default. If there is no interactive terminal or the build failed, no cleanup occurs. The script refuses cleanup through a symlinked build directory.
+
+**Preserved in every case:** firmware images (`.uf2`, `.bin`), ELF and map files, build logs, the Python environment, source files and `secrets.yaml`. Choosing cleanup means the removed compiler intermediates will be regenerated during a later build.
+
 Resolved `esphome config` output is stored privately rather than printed, because it may contain credentials. The explicit secrets review after the first `yes` is shown **only on the controlling terminal** via `/dev/tty`, bypassing `tee`, and does not enter the captured build transcript. **The values remain visible in terminal scrollback; run this only on a trusted local terminal.** Errors are preserved even when `tee` completes successfully.
 
 **Never publish raw private logs or `secrets.yaml`.** The review copy masks the configured secret values where recognized, but unrelated credentials may remain.
