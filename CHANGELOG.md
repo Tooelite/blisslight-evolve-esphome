@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Ask after a successful build whether to remove generated compiler intermediates; default to keeping them, and always preserve firmware and logs.
 - Review the actual local secrets on the terminal after initial confirmation and require a second explicit `yes`, without writing those values into the build log.
 - Allow standalone builds from an ordinary directory; remove fixed YAML Git-hash verification and Git-dependent preflight checks.
 - Initialize missing or empty local secrets from the tracked example; require confirmation and reject untouched placeholders.
