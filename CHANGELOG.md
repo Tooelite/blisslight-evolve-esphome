@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Initialize missing or empty local secrets from the tracked example; require confirmation and reject untouched placeholders.
+- Clear previous build-generated logs before each run while preserving unrelated files and preventing concurrent builds.
 - Provide an English technical reference for ESPHome, full raw recovery and FT232 wiring.
 - Build the included ESPHome configuration from the same repository, using an isolated Python environment.
 - Require interactive confirmation of local secrets before build actions.

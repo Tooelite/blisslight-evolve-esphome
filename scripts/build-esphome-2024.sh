@@ -18,6 +18,22 @@ stage() { printf '\n===== %s =====\n' "$*"; }
 # on screen AND saves them. PIPESTATUS ensures a failed build remains failed.
 if [[ "${ESPHOME_BUILD_LOG_WORKER:-0}" != "1" ]]; then
   mkdir -p "$LOGDIR" || die "Cannot create log directory: $LOGDIR"
+  command -v flock >/dev/null 2>&1 || die "flock is required to prevent concurrent build runs"
+  exec 9>"$LOGDIR/.build.lock"
+  flock -n 9 || die "Another build is already running; old logs were not removed"
+
+  # Remove only artifacts from preceding builds, never source files, secrets,
+  # the virtual environment or the actual compiled firmware.
+  find "$LOGDIR" -maxdepth 1 -type f \( \
+      -name 'build-*.full-private.log' -o \
+      -name 'build-*.config-private.log' -o \
+      -name 'build-*.compile-private.log' -o \
+      -name 'build-*.pip-private.log' -o \
+      -name 'build-*.review.log' -o \
+      -name 'build-*.uf2-files.txt' \
+    \) -delete || die "Failed to remove logs from the previous build"
+  printf 'PREVIOUS_BUILD_LOGS_CLEARED=%s\n' "$LOGDIR"
+
   RUN_ID="$(date -u '+%Y%m%dT%H%M%SZ')-$$"
   export ESPHOME_BUILD_LOG_WORKER=1
   export ESPHOME_BUILD_RUN_ID="$RUN_ID"
@@ -88,16 +104,35 @@ printf 'ACTUAL_YAML_GIT_BLOB=%s\n' "$actual_blob"
 [[ "$actual_blob" == "$EXPECTED_YAML_BLOB" ]] || die "YAML differs from verified source; do not auto-modify it"
 git -C "$WORKSPACE" rev-parse --short HEAD
 
-# Mandatory human gate before venv creation, package installation or compilation.
-# Read one answer from the terminal (not from a pipe or automation).
+stage "Prepare local secrets"
+SECRETS="$WORKSPACE/firmware/esphome/secrets.yaml"
+TEMPLATE="$WORKSPACE/firmware/esphome/secrets.example.yaml"
+[[ -f "$TEMPLATE" && -s "$TEMPLATE" ]] || die "Missing tracked secrets template: $TEMPLATE"
+[[ ! -L "$SECRETS" ]] || die "Refusing to replace a symlinked secrets file: $SECRETS"
+git -C "$WORKSPACE" check-ignore -q "$SECRETS" || die "Secrets are NOT Git-ignored"
+if [[ ! -s "$SECRETS" ]]; then
+  [[ ! -e "$SECRETS" || -f "$SECRETS" ]] || die "Secrets path is not a regular file"
+  install -m 600 -- "$TEMPLATE" "$SECRETS" || die "Cannot initialize secrets from template"
+  printf 'SECRETS_TEMPLATE_COPIED=%s\n' "$SECRETS"
+else
+  printf 'SECRETS_FILE_PRESERVED=%s\n' "$SECRETS"
+fi
+chmod 600 "$SECRETS"
+
+# Require explicit confirmation before venv creation, dependency installation
+# or compilation. The prompt lists the five keys without showing their values.
 bash "$SCRIPT_DIR/confirm-esphome-secrets.sh" "$WORKSPACE" || die "Build aborted at the secrets confirmation gate"
 
-stage "Check local secrets without printing their values"
-SECRETS="$WORKSPACE/firmware/esphome/secrets.yaml"
-[[ -s "$SECRETS" ]] || die "SECRETS_MISSING: create $SECRETS with real credentials"
-git -C "$WORKSPACE" check-ignore -q "$SECRETS" || die "Secrets are NOT Git-ignored"
-chmod 600 "$SECRETS"
-printf 'SECRETS_PRESENT_AND_IGNORED\n'
+# A yes answer alone must never permit firmware with untouched placeholders.
+for placeholder in REPLACE_WITH_WIFI_SSID REPLACE_WITH_WIFI_PASSWORD \
+  REPLACE_WITH_FALLBACK_AP_PASSWORD REPLACE_WITH_BASE64_32_BYTE_API_KEY \
+  REPLACE_WITH_OTA_PASSWORD; do
+  if grep -Fq -- "$placeholder" "$SECRETS"; then
+    die "SECRETS_INCOMPLETE: replace every template placeholder in $SECRETS"
+  fi
+done
+[[ -s "$SECRETS" ]] || die "SECRETS_MISSING: $SECRETS"
+printf 'SECRETS_CONFIRMED_AND_TEMPLATE_PLACEHOLDERS_CLEARED\n'
 
 stage "Select installed Python"
 is_candidate() {
