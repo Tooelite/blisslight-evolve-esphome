@@ -26,7 +26,7 @@ Der gesamte BIN-Dump ist die Recovery-Quelle; weder wird die App herausgeschnitt
 
 **Archiv im historischen Repository:** `Tooelite/bliss-evolve-android/firmware/references/evolve-reference-firmware-bk7231n-v1.0.tar.gz`.
 
-**Ziel im neuen privaten Repository:** `firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz` (bis zum lokalen Push noch nicht vorhanden).
+**Archiv im neuen privaten Repository vorhanden:** `firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz` (Commit `ef608ba7`, Git-Blob `c49af721f06ee05c6cc93f53f03b3334fd8b34be`, byteidentisch mit dem Forschungsarchiv).
 
 Archivgröße **1.637.617 Byte**, Archiv-SHA-256 **`2665124ef072fe579b4f38f85e39352cd08a35a0b71167b4706e0e39b40b6d37`**. Der unkomprimierte BIN-Inhalt hat die oben dokumentierte Größe und SHA-256. Die aktuelle `.gitignore` unterdrückt nur entpackte BIN-/UF2-/RBL-Dateien, nicht das `tar.gz`-Archiv.
 
@@ -50,7 +50,7 @@ git push origin main
 
 `cp -n` überschreibt eine vorhandene Datei nicht. Bei falscher Prüfsumme **abbrechen**; `git commit` und `git push` nicht ausführen. Das Zielrepository muss **privat** bleiben, solange die Weitergaberechte und der mögliche Anteil gerätespezifischer Daten ungeklärt sind.
 
-**Nach erfolgreichem Git-Push:** Aus der Wurzel dieses Recovery-Repositories den **BIN-Inhalt unverändert** extrahieren und prüfen:
+**Für die tatsächliche Recovery:** Aus der Wurzel dieses Repositorys den **BIN-Inhalt unverändert** aus dem nun vorhandenen Archiv extrahieren und prüfen:
 
 ```bash
 tar -xOzf firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz \
