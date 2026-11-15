@@ -110,7 +110,7 @@ TEMPLATE="$WORKSPACE/firmware/esphome/secrets.example.yaml"
 [[ -f "$TEMPLATE" && -s "$TEMPLATE" ]] || die "Missing tracked secrets template: $TEMPLATE"
 [[ ! -L "$SECRETS" ]] || die "Refusing to replace a symlinked secrets file: $SECRETS"
 git -C "$WORKSPACE" check-ignore -q "$SECRETS" || die "Secrets are NOT Git-ignored"
-if [[ ! -s "$SECRETS" ]]; then
+if [[ ! -s "$SECRETS" ]] || ! grep -q '[^[:space:]]' "$SECRETS" 2>/dev/null; then
   [[ ! -e "$SECRETS" || -f "$SECRETS" ]] || die "Secrets path is not a regular file"
   install -m 600 -- "$TEMPLATE" "$SECRETS" || die "Cannot initialize secrets from template"
   printf 'SECRETS_TEMPLATE_COPIED=%s\n' "$SECRETS"
