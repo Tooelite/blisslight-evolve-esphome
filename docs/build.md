@@ -1,6 +1,6 @@
 # Firmware B – build the complete Evolve image with ESPHome 2024.4.1
 
-**Working procedure v1.3 – 15 November 2026.** This document records the exact build sequence agreed for the next local attempt on Debian. **No ESPHome 2024.4.1 configuration validation, compilation, UF2 verification, or 2024-image flash has succeeded yet.** Update the steps only when the actual local logs justify a correction.
+**Working procedure v1.4 – 15 November 2026.** This document records the exact build sequence agreed for the next local attempt on Debian. **No ESPHome 2024.4.1 configuration validation, compilation, UF2 verification, or 2024-image flash has succeeded yet.** Update the steps only when the actual local logs justify a correction.
 
 **Current execution workspace:** `~/projekte/bliss-evolve-android` (the older research repository). This guide is maintained in `blisslight-evolve-esphome`, the canonical documentation repository. The firmware YAML is already **byte-identical** in both repositories, so the commands below deliberately keep the working path in the old repository while the first build is being validated. After a proven build, we can promote the checked procedure to run directly in this repository. Do not accidentally compile the obsolete ESPHome 2026 firmware.
 
@@ -94,14 +94,29 @@ The command automatically:
 2. Discovers an installed Python 3.9–3.13 executable (preferring period-appropriate versions), **prints the selected interpreter and version**, and creates or checks the independent `~/esphome-2024-env` virtual environment.
 3. Installs **exactly ESPHome 2024.4.1**, or reuses it if already present and verified.
 4. Checks the real local secrets, Git ignore rule and file permissions.
-5. Runs `esphome config`, then `esphome compile`, with `set -Eeuo pipefail`, `umask 077` and protected logs.
-6. Searches for UF2 files **only within the expected `galaxy-lamp` build directory**, avoiding accidental selection of the old 2026 UF2.
+5. Runs `esphome config` and `esphome compile` with `set -Eeuo pipefail`, `umask 077`, protected logs, and **live terminal progress** through `tee`. The entire worker's stdout and stderr are recorded in one uniquely named private run transcript; a config-output appendix contains resolved configuration values that can include secrets.
+6. Searches for UF2 files **only within the expected `galaxy-lamp` build directory**, avoiding accidental selection of the old 2026 UF2; prints size and SHA-256 of every candidate, but **does not approve or flash it**.
 
-Logs stay at `~/bliss-evolve-local/esphome-2024-build/` (`pip-install.log`, `config.log`, `compile.log`, `uf2-files.txt`). If a step fails, the script prints an explicit error and the local log path; it does **not** silently change ESPHome versions, recreate an existing environment, modify firmware functionality or access `/dev/ttyUSB0`.
+### Logging: live screen + complete local capture
 
-Expected milestones are `CONFIG_OK`, `COMPILE_OK`, and real UF2 path(s)/size. **These are expectations, not reported results.** The script does not perform an image safety check or flash. If either `config` or `compile` fails, inspect only the relevant redacted error lines, rather than pasting logs containing credentials.
+Each invocation creates a new unique run ID, with files under `~/bliss-evolve-local/esphome-2024-build/`:
 
-Record the actual Python executable/version, ESPHome version, PlatformIO/SDK versions, image path, size and SHA-256 before the next milestone.
+| File | Contents | Sharing rule |
+| --- | --- | --- |
+| `build-<run-id>.full-private.log` | Complete stdout/stderr from the build worker, plus the **unfiltered** `esphome config` output appended as a separate section; includes error codes | **Never upload directly** |
+| `build-<run-id>.review.log` | Automatically redacted copy of the complete transcript, replacing the five configured secret values where recognized | **Inspect locally first**, then share for analysis |
+| `build-<run-id>.config-private.log` | Original `esphome config` output (could display actual passwords and API keys) | **Keep private** |
+| `build-<run-id>.pip-private.log`, `build-<run-id>.compile-private.log`, `build-<run-id>.uf2-files.txt` | Separate phase logs for focused troubleshooting | Treat as private until reviewed |
+
+**On-screen progress:** Python selection, package installation, warnings, compiler output, failure messages, and UF2 discovery are displayed as they happen **and** recorded by `tee`. **Exception:** raw resolved `esphome config` output is withheld from the screen because it can reveal Wi-Fi/API passwords; the terminal shows `CONFIG_RUNNING` and then `CONFIG_OK` or `CONFIG_FAILED` instead. Its full output is nonetheless saved in the private transcript.
+
+**Error correctness:** Bash `pipefail` and explicit `PIPESTATUS` handling preserve the failed command's exit code even if `tee` succeeded. Any `tee` failure invalidates the run. A new run never overwrites a previous run's log.
+
+**Redaction limits:** `scripts/redact-esphome-build-log.py` attempts to remove the five YAML secret values in plain/quoted/URL-encoded form. Unknown credentials (e.g. private package-index tokens, serials, build flags) may remain. The script **refuses to create a review log** if the secrets are missing or cannot be parsed safely. **Inspect `build-<run-id>.review.log` for sensitive content before sharing it with ChatGPT.**
+
+Expected milestones are `CONFIG_OK`, `COMPILE_OK`, and the real UF2 path/size/hash. **These are expectations, not reported results.** No script here performs image layout QA or flashes hardware. A successful compile only enables the next QA step.
+
+Record the actual selected Python version, ESPHome/PlatformIO/SDK versions, completed image path, image size, and SHA-256 before the next milestone.
 
 ## 4. Inspect the actual image before authorizing a flash
 
@@ -115,11 +130,12 @@ Firmware B uses the **UF2 mapping embedded in the compiled image**. It is distin
 
 ## 5. Report progress and update this canonical guide
 
-For the current local attempt, report: `esphome version`, whether `CONFIG_OK` and `COMPILE_OK` appeared, and UF2 path/size. For errors, share **only the relevant redacted error lines**, not complete logs that may contain keys.
+For the current local attempt, provide the generated **`build-<run-id>.review.log`** after inspecting it for sensitive content. The script prints its full path as `REVIEW_LOG=...`. This review copy contains full stage detail after secret masking, including failure output when available. **Never upload `*.full-private.log`, `*.config-private.log`, or `secrets.yaml`.** If review-log creation fails, share only manually checked error excerpts instead.
 
 Once verified, record the actual build environment, corrections (if necessary), image hash and hardware results **here in the new repository**. The old `bliss-evolve-android` repo remains the research/source archive.
 
 ## Change log
 
 - **v1.2 (15 Nov 2026):** English working build procedure recorded from the agreed local instructions.
-- **v1.3 (15 Nov 2026):** Replaced the unverified `python3.11` executable assumption with a Python-auto-detecting, error-stopping build script. Recorded Debian Python 3.13.5 and distinguished PyPI minimum-version metadata from actual historical dependency compatibility. **Build and flash still untested.**
+- **v1.3 (15 Nov 2026):** Replaced the unverified `python3.11` executable assumption with Python autodetection; recorded local Debian Python 3.13.5.
+- **v1.4 (15 Nov 2026):** Added live `tee` progress, unique protected full-run transcripts, separate phase logs, automatic secret-redacted review copies, and error-code preservation. **No actual ESPHome 2024 build or flash claimed.**
