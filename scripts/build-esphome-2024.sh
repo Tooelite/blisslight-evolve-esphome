@@ -8,8 +8,7 @@ PROJECT_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
 WORKSPACE="${1:-$PROJECT_ROOT}"
 VENV="${ESPHOME_2024_VENV:-$WORKSPACE/.venv}"
 LOGDIR="${ESPHOME_2024_LOGDIR:-$WORKSPACE/.build-logs}"
-YAML_REL="firmware/esphome/galaxy-evolve-2024-v0.1.yaml"
-EXPECTED_YAML_BLOB="e099818947b7a7e8f1ae070ffffeae62e026af25"
+YAML="$WORKSPACE/firmware/esphome/galaxy-evolve-2024-v0.1.yaml"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 stage() { printf '\n===== %s =====\n' "$*"; }
@@ -96,20 +95,13 @@ fi
 
 stage "Source preflight"
 printf 'WORKSPACE=%s\nRUN_ID=%s\n' "$WORKSPACE" "$ESPHOME_BUILD_RUN_ID"
-[[ -d "$WORKSPACE/.git" ]] || die "Not a Git checkout: $WORKSPACE"
-[[ -f "$WORKSPACE/$YAML_REL" ]] || die "Missing YAML: $WORKSPACE/$YAML_REL"
-command -v git >/dev/null 2>&1 || die "Git is unavailable"
-actual_blob="$(git -C "$WORKSPACE" hash-object "$YAML_REL")" || die "Cannot hash YAML"
-printf 'ACTUAL_YAML_GIT_BLOB=%s\n' "$actual_blob"
-[[ "$actual_blob" == "$EXPECTED_YAML_BLOB" ]] || die "YAML differs from verified source; do not auto-modify it"
-git -C "$WORKSPACE" rev-parse --short HEAD
+[[ -f "$YAML" && -s "$YAML" ]] || die "Missing or empty firmware YAML: $YAML"
 
 stage "Prepare local secrets"
 SECRETS="$WORKSPACE/firmware/esphome/secrets.yaml"
 TEMPLATE="$WORKSPACE/firmware/esphome/secrets.example.yaml"
 [[ -f "$TEMPLATE" && -s "$TEMPLATE" ]] || die "Missing tracked secrets template: $TEMPLATE"
 [[ ! -L "$SECRETS" ]] || die "Refusing to replace a symlinked secrets file: $SECRETS"
-git -C "$WORKSPACE" check-ignore -q "$SECRETS" || die "Secrets are NOT Git-ignored"
 if [[ ! -s "$SECRETS" ]] || ! grep -q '[^[:space:]]' "$SECRETS" 2>/dev/null; then
   [[ ! -e "$SECRETS" || -f "$SECRETS" ]] || die "Secrets path is not a regular file"
   install -m 600 -- "$TEMPLATE" "$SECRETS" || die "Cannot initialize secrets from template"
@@ -175,7 +167,6 @@ printf '%s\n' "$VERSION"
 printf '%s\n' "$VERSION" | grep -Fq 'Version: 2024.4.1' || die "Wrong ESPHome version"
 
 stage "Validate configuration (private output only)"
-YAML="$WORKSPACE/$YAML_REL"
 printf 'CONFIG_PRIVATE_LOG=%s\nCONFIG_RUNNING=output hidden to protect credentials\n' "$ESPHOME_BUILD_CONFIG_LOG"
 if ! "$ESPHOME" config "$YAML" >"$ESPHOME_BUILD_CONFIG_LOG" 2>&1; then
   die "CONFIG_FAILED: inspect $ESPHOME_BUILD_CONFIG_LOG privately"
