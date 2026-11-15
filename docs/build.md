@@ -1,6 +1,6 @@
 # Firmware B – build the complete Evolve image with ESPHome 2024.4.1
 
-**Working procedure v1.4 – 15 November 2026.** This document records the exact build sequence agreed for the next local attempt on Debian. **No ESPHome 2024.4.1 configuration validation, compilation, UF2 verification, or 2024-image flash has succeeded yet.** Update the steps only when the actual local logs justify a correction.
+**Working procedure v1.5 – 15 November 2026.** This document records the exact build sequence agreed for the next local attempt on Debian. **No ESPHome 2024.4.1 configuration validation, compilation, UF2 verification, or 2024-image flash has succeeded yet.** Update the steps only when the actual local logs justify a correction.
 
 **Current execution workspace:** `~/projekte/bliss-evolve-android` (the older research repository). This guide is maintained in `blisslight-evolve-esphome`, the canonical documentation repository. The firmware YAML is already **byte-identical** in both repositories, so the commands below deliberately keep the working path in the old repository while the first build is being validated. After a proven build, we can promote the checked procedure to run directly in this repository. Do not accidentally compile the obsolete ESPHome 2026 firmware.
 
@@ -29,7 +29,7 @@ Included functions: RGBW GPIO6/26/24/9, star laser GPIO8, motor GPIO7 with 15% m
 
 PyPI release metadata for `esphome==2024.4.1` specifies **Python >=3.9**, without an upper bound. However, the April 2024 dependency stack is **not verified on Python 3.13**. We therefore auto-discover the available interpreter instead of assuming a specific `python3.X` executable. The build script prefers available Python 3.12/3.11/3.10/3.9 and falls back to Python 3.13 (or a suitable `python3` alias). It checks the version before creating a virtual environment, and reports a specific dependency error if installation fails. **No system Python installation or upgrade is performed.**
 
-The build script lives in this canonical repository: [`scripts/build-esphome-2024.sh`](../scripts/build-esphome-2024.sh). It uses the historical firmware YAML in `~/projekte/bliss-evolve-android`, verifies the exact original Git blob, keeps `~/esphome-env` intact, and never flashes hardware. **Prepare real secrets (next section) before executing the build command in step 3.**
+The build script lives in this canonical repository: [`scripts/build-esphome-2024.sh`](../scripts/build-esphome-2024.sh). It uses the historical firmware YAML in `~/projekte/bliss-evolve-android`, verifies the exact original Git blob, keeps `~/esphome-env` intact, and never flashes hardware. **Prepare real secrets (next section) before executing the build command in step 3.** An interactive confirmation gate now displays both the YAML and the local secrets-file path plus all five required keys; only the literal input `yes` allows any environment creation, package installation or build to proceed.
 
 ## 2. Check and protect the real local secrets
 
@@ -77,7 +77,7 @@ chmod 600 firmware/esphome/secrets.yaml
 
 ## 3. Validate and compile the original YAML
 
-After the five real secrets are present, execute the following from Debian. **You do not need to guess the Python command name or install a particular Python minor version first.**
+After the five real secrets are present, execute the following **interactively in a Debian terminal**. **You do not need to guess the Python command name or install a particular Python minor version first.** The script will ask you to confirm your secrets before creating/installing anything.
 
 ```bash
 # Make sure the canonical build scripts are available locally.
@@ -94,11 +94,12 @@ bash ~/projekte/blisslight-evolve-esphome/scripts/build-esphome-2024.sh \
 The command automatically:
 
 1. Confirms the working repo and original firmware YAML Git blob.
-2. Discovers an installed Python 3.9–3.13 executable (preferring period-appropriate versions), **prints the selected interpreter and version**, and creates or checks the independent `~/esphome-2024-env` virtual environment.
-3. Installs **exactly ESPHome 2024.4.1**, or reuses it if already present and verified.
-4. Checks the real local secrets, Git ignore rule and file permissions.
-5. Runs `esphome config` and `esphome compile` with `set -Eeuo pipefail`, `umask 077`, protected logs, and **live terminal progress** through `tee`. The entire worker's stdout and stderr are recorded in one uniquely named private run transcript; a config-output appendix contains resolved configuration values that can include secrets.
-6. Searches for UF2 files **only within the expected `galaxy-lamp` build directory**, avoiding accidental selection of the old 2026 UF2; prints size and SHA-256 of every candidate, but **does not approve or flash it**.
+2. **Before creating a virtual environment, installing packages, validating configuration or compiling**, prints the exact paths `~/projekte/bliss-evolve-android/firmware/esphome/secrets.yaml` (values) and `~/projekte/bliss-evolve-android/firmware/esphome/galaxy-evolve-2024-v0.1.yaml` (the five `!secret` references), then names all five required keys. The operator must enter **exactly `yes`**. Empty input, `no`, uppercase `YES`, extra whitespace, EOF or a noninteractive invocation **abort with a nonzero exit code**. The response and abortion outcome are recorded without printing secret values.
+3. Checks that the secrets file is nonempty, excluded from Git and set to mode 600.
+4. Discovers an installed Python 3.9–3.13 executable (preferring period-appropriate versions), **prints the selected interpreter and version**, and creates or checks the independent `~/esphome-2024-env` virtual environment.
+5. Installs **exactly ESPHome 2024.4.1**, or reuses it if already present and verified.
+6. Runs `esphome config` and `esphome compile` with `set -Eeuo pipefail`, `umask 077`, protected logs, and **live terminal progress** through `tee`. The entire worker's stdout and stderr are recorded in one uniquely named private run transcript; a config-output appendix contains resolved configuration values that can include secrets.
+7. Searches for UF2 files **only within the expected `galaxy-lamp` build directory**, avoiding accidental selection of the old 2026 UF2; prints size and SHA-256 of every candidate, but **does not approve or flash it**.
 
 ### Logging: live screen + complete local capture
 
@@ -113,7 +114,7 @@ Each invocation creates a new unique run ID, with files under `~/bliss-evolve-lo
 
 **On-screen progress:** Python selection, package installation, warnings, compiler output, failure messages, and UF2 discovery are displayed as they happen **and** recorded by `tee`. **Exception:** raw resolved `esphome config` output is withheld from the screen because it can reveal Wi-Fi/API passwords; the terminal shows `CONFIG_RUNNING` and then `CONFIG_OK` or `CONFIG_FAILED` instead. Its full output is nonetheless saved in the private transcript.
 
-**Error correctness:** Bash `pipefail` and explicit `PIPESTATUS` handling preserve the failed command's exit code even if `tee` succeeded. The local `scripts/test-build-logging.sh` checks Bash/Python syntax, redaction using **dummy test secrets**, fail-closed behavior and upstream error propagation; it **does not compile or flash anything**. Run it before the build. Any `tee` failure invalidates the run. A new run never overwrites a previous run's log.
+**Error correctness:** Bash `pipefail` and explicit `PIPESTATUS` handling preserve the failed command's exit code even if `tee` succeeded. The local `scripts/test-build-logging.sh` checks Bash/Python syntax, redaction using **dummy test secrets**, fail-closed behavior, upstream error propagation, and the exact-`yes` gate with a pseudo-terminal and invalid/noninteractive answers; it **does not compile or flash anything**. Run it before the build. Any `tee` failure invalidates the run. A new run never overwrites a previous run's log.
 
 **Redaction limits:** `scripts/redact-esphome-build-log.py` attempts to remove the five YAML secret values in plain/quoted/URL-encoded form. Unknown credentials (e.g. private package-index tokens, serials, build flags) may remain. The script **refuses to create a review log** if the secrets are missing or cannot be parsed safely. **Inspect `build-<run-id>.review.log` for sensitive content before sharing it with ChatGPT.**
 
@@ -141,4 +142,5 @@ Once verified, record the actual build environment, corrections (if necessary), 
 
 - **v1.2 (15 Nov 2026):** English working build procedure recorded from the agreed local instructions.
 - **v1.3 (15 Nov 2026):** Replaced the unverified `python3.11` executable assumption with Python autodetection; recorded local Debian Python 3.13.5.
-- **v1.4 (15 Nov 2026):** Added live `tee` progress, unique protected full-run transcripts, separate phase logs, automatic secret-redacted review copies, and error-code preservation. **No actual ESPHome 2024 build or flash claimed.**
+- **v1.4 (15 Nov 2026):** Added live `tee` progress, complete private run transcripts and redacted review logs.
+- **v1.5 (15 Nov 2026):** Mandatory interactive pre-install secret confirmation in `scripts/confirm-esphome-secrets.sh`, naming both exact local paths and all five keys; only the exact reply `yes` passes, with noninteractive and negative/invalid replies failing closed. Confirmation behavior included in read-only logging QA. **No ESPHome 2024 build or flash claimed.**
