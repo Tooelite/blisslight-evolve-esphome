@@ -259,4 +259,81 @@ grep -Fxq CUSTOM_NONEMPTY_SECRET_FILE "$SECRETS_FIXTURE"
 [[ ! -e "$FIXTURE_VENV" ]]
 echo "PASS: existing nonempty secrets preserved unchanged"
 
+# Exercise the real cleanup block without running a compiler or touching hardware.
+"$PYTHON" - "$ROOT/build-esphome-2024.sh" "$TMP" <<'PYCLEANUP'
+import fcntl
+import os
+from pathlib import Path
+import subprocess
+import sys
+import termios
+
+builder = Path(sys.argv[1]).read_text()
+root = Path(sys.argv[2])
+start = builder.index("  # Optional, post-success cleanup.")
+end = builder.index("  printf '\\nBUILD_EXIT_CODE=", start)
+cleanup_code = "set -Eeuo pipefail\n" + builder[start:end] + '\nexit "$worker_status"\n'
+workspace = root / "cleanup-workspace"
+build_dir = workspace / "firmware/esphome/.esphome/build/galaxy-lamp"
+build_dir.mkdir(parents=True)
+keep = ("firmware.uf2", "firmware.bin", "firmware.elf", "firmware.map")
+temporary = ("main.o", "main.d", "lib.a")
+
+def seed():
+    for name in keep + temporary:
+        (build_dir / name).write_bytes(b"fixture")
+
+def run(answer=None, status=0):
+    env = dict(os.environ, WORKSPACE=str(workspace), FULL_LOG=str(root / "cleanup.log"),
+               worker_status=str(status), tee_status="0")
+    if answer is None:
+        return subprocess.run(
+            ["bash", "-c", cleanup_code], env=env, stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=10,
+        )
+    master, slave = os.openpty()
+    try:
+        def setup_terminal():
+            os.setsid()
+            fcntl.ioctl(0, termios.TIOCSCTTY, 0)
+        proc = subprocess.Popen(
+            ["bash", "-c", cleanup_code], env=env, stdin=slave,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            preexec_fn=setup_terminal,
+        )
+        os.close(slave)
+        slave = -1
+        os.write(master, (answer + "\n").encode())
+        output, _ = proc.communicate(timeout=10)
+        return proc.returncode, output.decode(errors="replace")
+    finally:
+        os.close(master)
+        if slave >= 0:
+            os.close(slave)
+
+seed()
+code, stdout = run("no")
+assert code == 0 and "TEMP_CLEANUP=skipped" in stdout
+assert all((build_dir / f).exists() for f in keep + temporary)
+print("PASS: cleanup declined; all files retained")
+
+code, stdout = run("yes")
+assert code == 0 and "TEMP_CLEANUP=done" in stdout
+assert all((build_dir / f).exists() for f in keep)
+assert all(not (build_dir / f).exists() for f in temporary)
+assert "TEMP_CLEANUP=done" in (root / "cleanup.log").read_text()
+print("PASS: cleanup approved; only compiler intermediates removed and logged")
+
+seed()
+res = run(None)
+assert res.returncode == 0 and "TEMP_CLEANUP=skipped" in res.stdout
+assert all((build_dir / f).exists() for f in temporary)
+print("PASS: noninteractive cleanup defaults to keep")
+
+code, stdout = run("yes", status=1)
+assert code == 1 and "TEMP_CLEANUP" not in stdout
+assert all((build_dir / f).exists() for f in temporary)
+print("PASS: failed build does not offer or perform cleanup")
+PYCLEANUP
+
 echo "LOGGING_QA_OK"
