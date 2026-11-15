@@ -1,18 +1,33 @@
-# BlissLights Evolve: full-BIN recovery over BK7231N UART
+# BlissLights Evolve – technische Reinschrift v1.0
 
-**Goal:** restore a BlissLights Evolve (CBU/BK7231N, 2 MiB flash) from the **complete 2 MiB community stock-firmware dump** using the same FT232/UART/ltchiptool transport that previously transferred an ESPHome UF2 to this projector.
+**Gerät:** BlissLights Evolve SKY-EVOLVE-B-RCWB, Tuya CBU / BK7231N, 2 MiB Flash.
 
-**Important distinction:** the earlier UF2 **write completed**, but stable operation was not demonstrated. Writing the community BIN is technically supported by the same tool in **raw mode**, but has **not yet been tried or approved on this projector**. The community image is from a different unit; it is not a backup of this unit's identity or calibration data.
+Dieses Repository ist ab 15.11.2026 die **verbindliche, bereinigte Arbeitsgrundlage** für Wiederherstellung, ESPHome-Firmwarebau und Waveshare-FT232-Anschluss. Das frühere Repository `Tooelite/bliss-evolve-android` dient als **Quellen- und Belegarchiv** (historische Logs, eigene Teilbackups, fremder Firmwaredump), nicht mehr als maßgebliche Recovery-Anleitung. Kein Vermischen von alter Android-/Tuya-Forschung mit diesen Verfahren.
 
-## Actual recovery path
+## Zwei getrennte Firmwarewege
 
-1. Extract the known 2 MiB BIN locally, then run `python3 scripts/check-image.py firmware/recovery/recovery-image.bin`.
-2. Use the already proven `~/esphome-env/bin/ltchiptool` on Debian, the Waveshare 6170 FT232, verified RX1/TX1/GND wiring and the **CEN-to-GND reset sequence** to enter the BK7231N download mode.
-3. **Image analysis recorded (15 Nov 2026):** correct SHA-256 and a structurally valid bootloader RBL at physical file offset `0x10F9A` with payload CRC checked. The no-RBL app scan begins at `0x011000`; its printed size is extracted payload length, **not a flash-write length**. Tuya key-value storage is found at `0x1EE000`. Exact flash ranges are not yet approved.
-4. **Preferred recovery design:** preserve the already responding bootloader (`0x000000–0x010FFF`) and preserve own-device configuration wherever possible; write only identified stock application regions at their *original addresses*. The write range must be evidenced and approved before any command is run. Full-chip replacement is an exceptional, separately justified option.
+| Weg | Quelle | Zweck | Stand |
+| --- | --- | --- | --- |
+| **A · Original-Recovery** | Vollständiger 2-MiB-Community-BIN-Dump | Wiederherstellung der originalen Beken/Tuya-Firmware | BIN identifiziert, Bootloader-RBL geprüft, UART-Rohschreiben im Werkzeugcode belegt; **noch nicht am Gerät ausgeführt** |
+| **B · Eigene ESPHome-Firmware** | `firmware/esphome/galaxy-evolve-2024-v0.1.yaml` | Lokale RGBW-, Laser-, Motor- und Tastensteuerung | Quellstand gesichert; **ESPHome-2024.4.1-Build noch offen** |
 
-**No UF2 conversion required.** The same `ltchiptool flash write` CLI supports UF2 and raw BIN. For raw BIN, explicit `-f bk7231n -s <validated-target-address>` selects raw mode; when restoring from a full-dump file, the matching input offset must also be supplied with `-S <validated-file-offset>`. **Never shift the firmware data into the wrong flash address.**
+Beide Wege verwenden denselben **Waveshare 6170 / FT232 → BK7231N UART1**-Zugang, manuelles CEN-Reset und `ltchiptool flash write -c`. Für **A** ist das Eingabeformat **RAW BIN** mit expliziten Adressen; für **B** ist es ein erst noch zu bauendes **UF2** mit dessen Mapping. **Nicht verwechseln.**
 
-The exact preparation, **non-writing chip-info command**, evidence for the BIN layout, partial-range rules and stop conditions are in [docs/recovery.md](docs/recovery.md). Physical wiring and CEN reset: [docs/wiring.md](docs/wiring.md).
+## Einzige aktuellen Anleitungen
 
-The raw BIN is **not stored in this public repository**. `firmware/recovery/*.bin` is ignored by Git. Do not commit it or logs containing private device identity information.
+- [A – Recovery aus dem vollständigen Original-Fremddump](docs/recovery.md)
+- [B – ESPHome 2024.4.1 mit realen lokalen Secrets bauen](docs/build.md)
+- [Waveshare 6170: 3,3-V-UART, Verdrahtung, CEN/Reset und Debian](docs/wiring.md)
+- [Fehlerfälle](docs/troubleshooting.md)
+
+## Nachgewiesener Ist-Zustand
+
+Am 14.11.2026 wurde über FT232/UART ein anderes **ESPHome-2026-UF2** mit `ltchiptool flash write -c` übertragen; Chipkennung `BK7231N`, Werkzeugabschluss nach 70,966 s. Der AP erschien nur kurz; **stabiler Betrieb war nicht nachgewiesen**. Dies ist ein Transportnachweis, keine erfolgreiche Firmware-Wiederherstellung.
+
+**Original-Recovery-BIN:** 2.097.152 Byte, SHA-256 `07a76fa01817d4924cebe72b3ebfe789a86bdb3c94418d7570baaf10e1b58da0`. Das lokal extrahierte Bild wurde am 15.11.2026 hashgeprüft. `bk7231tools dissect_dump` ergibt für `ota_1` und `ota_big` **identisch**: CRC-valider Bootloader-RBL bei `0x10F9A`, App-Scan ab `0x11000` ohne RBL (extrahierte Nutzdaten `0xDEAC0`), Tuya-Storage ab `0x1EE000`. **Nicht die Größe der App-Nutzdaten als Flash-Schreibbereich verwenden.**
+
+**Zielgeräte-Backups:** Main `0x11000–0x1EDFFF` (1.953.792 B), Config `0x1EE000–0x1FFFFF` (73.728 B). Der eigene Bootloaderbereich `0x00000–0x10FFF` fehlt als Backup.
+
+**Sicherheit:** Das vollständige Fremd-BIN liegt nicht im öffentlichen Repository. Der geplante vollständige RAW-Restore überschreibt sämtliche 2 MiB **einschließlich Bootloader und gerätespezifischer Daten**. Ein solcher Write erfolgt ausschließlich nach expliziter Freigabe. Bisher weder Original-Recovery noch ESPHome-2024-Flash ausgeführt.
+
+**Status / Änderungsverlauf v1.0:** Vorherige Entwurfsanleitungen durch zwei eindeutig getrennte und nachvollziehbare Wege ersetzt; Quelle, nachgewiesene Analyse, Gerätekontakt und Grenzen konsolidiert. Kein Hardwarezugriff.
