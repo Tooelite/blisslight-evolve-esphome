@@ -66,7 +66,7 @@ if [[ "${ESPHOME_BUILD_LOG_WORKER:-0}" != "1" ]]; then
   # removed; finished UF2/BIN/ELF files, logs, secrets and venv are preserved.
   if (( worker_status == 0 && tee_status == 0 )); then
     cleanup_answer=""
-    if [[ -c /dev/tty ]]; then
+    if [[ -t 0 && -c /dev/tty ]] && { : </dev/tty; } 2>/dev/null; then
       printf '\nRemove temporary compiler files (*.o, *.d, *.a)? Firmware and logs will be kept. [yes/NO]: ' >/dev/tty
       IFS= read -r cleanup_answer </dev/tty || cleanup_answer=""
     fi
