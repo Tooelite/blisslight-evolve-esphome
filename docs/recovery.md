@@ -30,7 +30,27 @@ Der gesamte BIN-Dump ist die Recovery-Quelle; weder wird die App herausgeschnitt
 
 Archivgröße **1.637.617 Byte**, Archiv-SHA-256 **`2665124ef072fe579b4f38f85e39352cd08a35a0b71167b4706e0e39b40b6d37`**. Der unkomprimierte BIN-Inhalt hat die oben dokumentierte Größe und SHA-256. Die aktuelle `.gitignore` unterdrückt nur entpackte BIN-/UF2-/RBL-Dateien, nicht das `tar.gz`-Archiv.
 
-Nach dem manuellen Kopieren/Pushen des Archivs: Aus der Wurzel dieses Recovery-Repositories den **BIN-Inhalt unverändert** extrahieren und prüfen:
+**Einmalige Übernahme auf Debian (separat vom Flash, nur Git):**
+
+```bash
+cd ~/projekte
+# Nur falls noch nicht geklont:
+test -d blisslight-evolve-esphome/.git || git clone https://github.com/Tooelite/blisslight-evolve-esphome.git
+cd blisslight-evolve-esphome
+git pull --ff-only
+
+cp -n ../bliss-evolve-android/firmware/references/evolve-reference-firmware-bk7231n-v1.0.tar.gz \
+  firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz
+echo '2665124ef072fe579b4f38f85e39352cd08a35a0b71167b4706e0e39b40b6d37  firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz' | sha256sum -c -
+
+git add firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz
+git commit -m "Add verified original community recovery archive"
+git push origin main
+```
+
+`cp -n` überschreibt eine vorhandene Datei nicht. Bei falscher Prüfsumme **abbrechen**; `git commit` und `git push` nicht ausführen. Das Zielrepository muss **privat** bleiben, solange die Weitergaberechte und der mögliche Anteil gerätespezifischer Daten ungeklärt sind.
+
+**Nach erfolgreichem Git-Push:** Aus der Wurzel dieses Recovery-Repositories den **BIN-Inhalt unverändert** extrahieren und prüfen:
 
 ```bash
 tar -xOzf firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz \
