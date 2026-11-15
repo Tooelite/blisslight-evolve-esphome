@@ -69,7 +69,7 @@ def read_secrets(path: Path) -> dict[str, str]:
     values: dict[str, str] = {}
     for key in EXPECTED:
         value = data[key]
-        if not isinstance(value, str) or len(value) < 3:
+        if not isinstance(value, str) or len(value) < 3 or '\n' in value or '\r' in value:
             raise ValueError(f"Secret {key} must be a string of at least 3 characters for log redaction")
         values[key] = value
     return values
