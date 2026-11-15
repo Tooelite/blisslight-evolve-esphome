@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Allow standalone builds from an ordinary directory; remove fixed YAML Git-hash verification and Git-dependent preflight checks.
 - Initialize missing or empty local secrets from the tracked example; require confirmation and reject untouched placeholders.
 - Clear previous build-generated logs before each run while preserving unrelated files and preventing concurrent builds.
 - Provide an English technical reference for ESPHome, full raw recovery and FT232 wiring.

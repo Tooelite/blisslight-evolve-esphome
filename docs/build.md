@@ -6,7 +6,7 @@ The source includes RGBW outputs, star laser PWM, motor PWM, button controls, st
 
 ## Requirements
 
-- Linux with Python 3, `venv`, `pip` and Git.
+- Linux with Python 3, `venv` and `pip`. **Git is not required.**
 - Internet access to fetch ESPHome, PlatformIO and SDK dependencies.
 - Real local credentials in `firmware/esphome/secrets.yaml`.
 
@@ -22,7 +22,7 @@ The existing interactive confirmation displays the exact destination and all fiv
 python3 -c 'import base64,secrets; print(base64.b64encode(secrets.token_bytes(32)).decode())'
 ```
 
-The fallback access point is named `Galaxy-Evolve`. Keep `secrets.yaml` private and Git-ignored; do not commit or share it.
+The fallback access point is named `Galaxy-Evolve`. Keep `secrets.yaml` private; it is excluded by the supplied `.gitignore` in a Git checkout, but a Git checkout is not required. Never publish or share it.
 
 ## 2. Build from this repository
 
@@ -33,7 +33,7 @@ bash scripts/test-build-logging.sh
 bash scripts/build-esphome-2024.sh
 ```
 
-The build script uses the source YAML in **this repository** by default. It checks the source file, shows the exact paths to the YAML and local secrets, and lists all five required keys. **Only the exact interactive response `yes`** permits environment creation, dependency installation, configuration and compilation. All other responses and noninteractive input abort.
+The build script uses the source YAML alongside the script's project directory by default. It checks that the YAML exists and is nonempty, shows the paths to the YAML and local secrets, and lists all five required keys. **No Git checkout or fixed YAML hash is required:** the same files can be extracted and built from an ordinary directory. **Only the exact interactive response `yes`** permits environment creation, dependency installation, configuration and compilation. All other responses and noninteractive input abort.
 
 Before confirmation, the script creates the private secrets file from the tracked template if necessary, without overwriting real values. After confirmation and a placeholder check, it selects Python, creates or reuses the isolated `.venv/`, installs/verifies **ESPHome 2024.4.1**, runs configuration and compilation, and reports UF2 candidates with sizes and SHA-256 hashes. **It does not flash the device.**
 
