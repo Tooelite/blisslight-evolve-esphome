@@ -20,7 +20,7 @@ printf '  wifi_password             - home Wi-Fi password\n'
 printf '  fallback_ap_password      - fallback access-point password\n'
 printf '  evolve_2024_api_key       - Base64 key for 32 raw encryption bytes\n'
 printf '  evolve_2024_ota_password  - ESPHome OTA password\n'
-printf 'No values are printed here. The file must remain local and Git-ignored.\n'
+printf 'No values are printed here. Keep this file private; do not publish it.\n'
 
 if [[ ! -t 0 ]]; then
   printf 'SECRETS_CONFIRMATION_ABORTED: no interactive terminal; run the build in a terminal and enter exactly yes.\n' >&2
