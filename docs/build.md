@@ -4,7 +4,7 @@
 
 ## 1. Verbindlicher Quellstand
 
-- **Einzige Build-YAML:** [galaxy-evolve-2024-v0.1.yaml](../firmware/esphome/galaxy-evolve-2024-v0.1.yaml), byteidentisch zum bisherigen Forschungsstand (Git-Blob `e099818947b7a7e8f1ae070ffffeae62e026af25`).
+- **Einzige Build-YAML:** [galaxy-evolve-2024-v0.1.yaml](../firmware/esphome/galaxy-evolve-2024-v0.1.yaml), byteidentisch zum bisherigen Forschungsstand (Git-Blob `e099818947b7a7e8f1ae070ffffeae62e026af25`). Ursprüngliche Evolve-Konfiguration von **Dawk323**, [Elektroda, Beitrag #13 vom 27.04.2024](https://www.elektroda.com/rtvforum/topic3984240.html); Praxistest von **helge1** am 29.06.2024.
 - **ESPHome:** exakt **2024.4.1** in einer eigenen Python-Umgebung, nicht das vorhandene ESPHome 2026.
 - **LibreTiny:** Git-Commit `d1386a8e9dcdeed4c50dd0628462b14c9295d304` ist bereits in der YAML eingetragen; historisch plausibel, aber nicht als damalige Originalversion nachgewiesen.
 - **Funktionen unverändert:** RGBW GPIO6/26/24/9; Sternlaser GPIO8; Motor GPIO7 mit 15 % Mindestleistung; Gerätetaste GPIO14; Status-LED GPIO0; zwei Zufallseffekte. Der möglicherweise fehlerhafte Community-Dimmcode (+5 % in beiden Zweigen) bleibt zunächst originalgetreu.
