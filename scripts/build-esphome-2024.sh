@@ -62,8 +62,6 @@ if [[ "${ESPHOME_BUILD_LOG_WORKER:-0}" != "1" ]]; then
       cat "$ESPHOME_BUILD_CONFIG_LOG"
     } >>"$FULL_LOG"
   fi
-  printf '\nBUILD_EXIT_CODE=%s\nTEE_EXIT_CODE=%s\n' "$worker_status" "$tee_status" | tee -a "$FULL_LOG"
-
   # Optional, post-success cleanup. Only generated compiler intermediates are
   # removed; finished UF2/BIN/ELF files, logs, secrets and venv are preserved.
   if (( worker_status == 0 && tee_status == 0 )); then
@@ -89,6 +87,8 @@ if [[ "${ESPHOME_BUILD_LOG_WORKER:-0}" != "1" ]]; then
       printf 'TEMP_CLEANUP=skipped\n' | tee -a "$FULL_LOG"
     fi
   fi
+
+  printf '\nBUILD_EXIT_CODE=%s\nTEE_EXIT_CODE=%s\n' "$worker_status" "$tee_status" | tee -a "$FULL_LOG"
 
   # Try to produce a separately redacted review file. If secrets cannot be
   # interpreted reliably, fail closed and leave only the private transcript.
