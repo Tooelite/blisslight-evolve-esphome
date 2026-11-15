@@ -1,19 +1,33 @@
-# BlissLights Evolve : Recovery
+# BlissLights Evolve – technische Reinschrift v1.0
 
-BK7231N (2 MiB) recovery using a SHA-256-identified community firmware image and Waveshare 6170 USB-UART adapter.
+**Gerät:** BlissLights Evolve SKY-EVOLVE-B-RCWB, Tuya CBU / BK7231N, 2 MiB Flash.
 
-## Linux
+Dieses Repository ist ab 15.11.2026 die **verbindliche, bereinigte Arbeitsgrundlage** für Wiederherstellung, ESPHome-Firmwarebau und Waveshare-FT232-Anschluss. Das frühere Repository `Tooelite/bliss-evolve-android` dient als **Quellen- und Belegarchiv** (historische Logs, eigene Teilbackups, fremder Firmwaredump), nicht mehr als maßgebliche Recovery-Anleitung. Kein Vermischen von alter Android-/Tuya-Forschung mit diesen Verfahren.
 
-```bash
-sudo apt-get update
-sudo apt-get install -y python3-venv python3-pip usbutils
-bash scripts/setup-linux.sh
-python3 scripts/check-image.py firmware/recovery/recovery-image.bin
-python3 scripts/waveshare-ft232-loopback.py --port /dev/ttyUSB0
-```
+## Zwei getrennte Firmwarewege
 
-- [FT232 configuration, Debian serial port and Dupont wiring](docs/wiring.md)
-- [Recovery steps](docs/recovery.md)
-- [Troubleshooting](docs/troubleshooting.md)
+| Weg | Quelle | Zweck | Stand |
+| --- | --- | --- | --- |
+| **A · Original-Recovery** | Vollständiger 2-MiB-Community-BIN-Dump | Wiederherstellung der originalen Beken/Tuya-Firmware | BIN identifiziert, Bootloader-RBL geprüft, UART-Rohschreiben im Werkzeugcode belegt; **noch nicht am Gerät ausgeführt** |
+| **B · Eigene ESPHome-Firmware** | `firmware/esphome/galaxy-evolve-2024-v0.1.yaml` | Lokale RGBW-, Laser-, Motor- und Tastensteuerung | Quellstand gesichert; **ESPHome-2024.4.1-Build noch offen** |
 
-**Recovery image is not in this repository. Do not flash a foreign full-device dump without reviewing its bootloader, configuration and device-specific regions.**
+Beide Wege verwenden denselben **Waveshare 6170 / FT232 → BK7231N UART1**-Zugang, manuelles CEN-Reset und `ltchiptool flash write -c`. Für **A** ist das Eingabeformat **RAW BIN** mit expliziten Adressen; für **B** ist es ein erst noch zu bauendes **UF2** mit dessen Mapping. **Nicht verwechseln.**
+
+## Einzige aktuellen Anleitungen
+
+- [A – Recovery aus dem vollständigen Original-Fremddump](docs/recovery.md)
+- [B – ESPHome 2024.4.1 mit realen lokalen Secrets bauen](docs/build.md)
+- [Waveshare 6170: 3,3-V-UART, Verdrahtung, CEN/Reset und Debian](docs/wiring.md)
+- [Fehlerfälle](docs/troubleshooting.md)
+
+## Nachgewiesener Ist-Zustand
+
+Am 14.11.2026 wurde über FT232/UART ein anderes **ESPHome-2026-UF2** mit `ltchiptool flash write -c` übertragen; Chipkennung `BK7231N`, Werkzeugabschluss nach 70,966 s. Der AP erschien nur kurz; **stabiler Betrieb war nicht nachgewiesen**. Dies ist ein Transportnachweis, keine erfolgreiche Firmware-Wiederherstellung.
+
+**Original-Recovery-BIN:** 2.097.152 Byte, SHA-256 `07a76fa01817d4924cebe72b3ebfe789a86bdb3c94418d7570baaf10e1b58da0`. Das lokal extrahierte Bild wurde am 15.11.2026 hashgeprüft. `bk7231tools dissect_dump` ergibt für `ota_1` und `ota_big` **identisch**: CRC-valider Bootloader-RBL bei `0x10F9A`, App-Scan ab `0x11000` ohne RBL (extrahierte Nutzdaten `0xDEAC0`), Tuya-Storage ab `0x1EE000`. **Nicht die Größe der App-Nutzdaten als Flash-Schreibbereich verwenden.**
+
+**Zielgeräte-Backups:** Main `0x11000–0x1EDFFF` (1.953.792 B), Config `0x1EE000–0x1FFFFF` (73.728 B). Der eigene Bootloaderbereich `0x00000–0x10FFF` fehlt als Backup.
+
+**Sicherheit:** Das vollständige Fremd-BIN liegt nicht im öffentlichen Repository. Der geplante vollständige RAW-Restore überschreibt sämtliche 2 MiB **einschließlich Bootloader und gerätespezifischer Daten**. Ein solcher Write erfolgt ausschließlich nach expliziter Freigabe. Bisher weder Original-Recovery noch ESPHome-2024-Flash ausgeführt.
+
+**Status / Änderungsverlauf v1.0:** Vorherige Entwurfsanleitungen durch zwei eindeutig getrennte und nachvollziehbare Wege ersetzt; Quelle, nachgewiesene Analyse, Gerätekontakt und Grenzen konsolidiert. Kein Hardwarezugriff.

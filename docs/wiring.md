@@ -1,93 +1,60 @@
-# Waveshare 6170 : serial setup and wiring (Debian)
+# Waveshare 6170 / FT232 – Verdrahtung und BK7231N-Download-Reset
 
-## 1. Configure the FT232 adapter
+**Gerät:** BlissLights Evolve CBU/BK7231N. **Adapter:** Waveshare 6170, FT232 USB-UART. Der bisherige Schreibvorgang über `/dev/ttyUSB0` war erfolgreich verbunden. Der tatsächliche Aufdruck und die Revision des konkreten Adapters bestimmen die Jumperstellungen – **USB-ID `0403:6001` allein beweist kein bestimmtes Platinenlayout**.
 
-**Disconnect the projector before configuring the adapter.**
+## 1. Elektrische Einstellung vor Anschluss
 
-1. Adapter model: **Waveshare 6170 FT232 USB-UART, USB-A**. Check the PCB revision and its printed jumper labels against the corresponding Waveshare 6170 documentation before connecting. **FT232 and USB ID `0403:6001` identify the USB-UART chip, not the board model.** Do not use jumper positions or pin numbering from another model.
-2. Set the adapter's **UART I/O voltage to 3.3 V** *only if the actual adapter provides a selectable 3.3 V logic level and the projector's UART level has been verified as 3.3 V*. On boards with separate VCC and VCCIO settings, the relevant setting is **VCCIO / UART logic**, not merely the supply output. If the jumper labels or measured logic voltage are uncertain, stop.
-3. Select **TTL UART**, not RS-232 voltage levels. Do not use 5 V UART logic on an unverified 3.3 V target.
-4. Leave **VCC, 3V3 and 5V supply outputs disconnected** from the projector until its power supply arrangement has been independently established.
-5. Use **TXD, RXD and GND** only. Hardware flow control **RTS/CTS is disabled**; do not connect RTS/CTS or DTR unless a verified boot/reset procedure requires them.
-6. Serial framing for the **adapter-only loopback**: **115200 baud, 8 data bits, no parity, 1 stop bit, no flow control (115200 8N1)**. The BK7231N bootloader flashing tool may choose its own baud rate; do not force the loopback rate onto flashing commands without checking the tool.
+- **UART-Logikpegel: 3,3 V**, nicht RS-232 und nicht ungeprüfte 5-V-Logik. Falls VCC und VCCIO separat einstellbar sind, ist **VCCIO** der Logikpegel.
+- **Stromversorgung:** Projektor aus seiner geeigneten Versorgung; die VCC/3V3/5V-Leitungen des USB-Adapters **nicht** mit dem Projektor verbinden, solange die Versorgung nicht separat elektrisch geprüft ist.
+- **Keine Hardwareflusskontrolle:** RTS/CTS/DTR nicht anschließen; für den dokumentierten Weg CEN manuell nach GND resetten.
+- Vor jeder Änderung der Leitungen Stromversorgung trennen; keine spannungsführenden Leiter oder unbekannten Pads kurzschließen.
 
-## 2. Connect the FT232 to Debian
+## 2. Pinbelegung
 
-Plug the FT232 into USB **without the projector attached**.
+| Waveshare FT232 | BK7231N / CBU | Bedeutung |
+| --- | --- | --- |
+| **GND** | **GND** | Gemeinsame Masse |
+| **TXD** | **RX1 / P10 / GPIO10** | TX am USB-UART zu RX am Chip |
+| **RXD** | **TX1 / P11 / GPIO11** | RX am USB-UART zu TX am Chip |
+| **VCC, 3V3, 5V** | **nicht verbinden** | Keine ungeprüfte Versorgung über USB-UART |
+| **RTS / CTS / DTR** | **nicht verbinden** | Keine Flow-Control-Leitungen |
+| **GND**, kurzzeitig per separater Leitung | **CEN / Reset** | Bootloader-Einstieg durch kurzen Low-Impuls |
+
+**Achtung:** Die elektrische Signalbezeichnung legt **nicht** die physische Position eines Lötpads am konkreten Projektor fest. Die CEN-Leitung muss anhand der realen Platine identifiziert werden. Nur zum Reset kurz CEN mit GND verbinden, **nicht dauerhaft**.
+
+## 3. Debian und FT232 prüfen
+
+Den Adapter zunächst **ohne angeschlossenen Projektor** an USB anschließen:
 
 ```bash
 lsusb -d 0403:6001
 ls -l /dev/serial/by-id/
 ls -l /dev/ttyUSB*
-dmesg | tail -n 30
-```
-
-The device path may differ from `/dev/ttyUSB0`.
-
-The Linux kernel driver is normally `ftdi_sio` via `usbserial`. Check it if the port is missing:
-
-```bash
 lsmod | grep -E '^(ftdi_sio|usbserial)\b' || true
-sudo modprobe ftdi_sio
-```
-
-Check access and port ownership:
-
-```bash
-id -nG
-ls -l /dev/ttyUSB0
 fuser /dev/ttyUSB0 || true
 ```
 
-On Debian, serial devices commonly belong to the `dialout` group. If the device permissions confirm this and your user lacks access:
+Unter Debian ist meist `ftdi_sio` aktiv. Bei fehlenden Rechten `dialout`-Gruppenzugehörigkeit prüfen; nach einer Gruppenänderung neu anmelden. Serielle Monitore müssen vor `ltchiptool` geschlossen sein. `/dev/ttyUSB0` ist der belegte frühere Anschluss, muss beim erneuten Verbinden kontrolliert werden.
 
-```bash
-sudo usermod -aG dialout "$USER"
-```
-
-**Log out and log back in** before retrying; do not use `chmod 666` as a workaround. Close serial monitors or other processes holding the port.
-
-## 3. Test the configured serial connection (adapter only)
-
-With the projector **disconnected**, temporarily connect the FT232 **TXD pin to its RXD pin** using one Dupont jumper; **do not bridge any power pins**.
+**Adapter-only-Loopback:** Projektor abklemmen, FT232-TXD und FT232-RXD vorübergehend miteinander verbinden, dann:
 
 ```bash
 python3 scripts/waveshare-ft232-loopback.py --port /dev/ttyUSB0 --timeout 3
 ```
 
-The script sets **115200 8N1** with software and RTS/CTS hardware flow control disabled. It sends `BLISS-WAVESHARE-LOOPBACK-12345`, and checks that exactly those bytes return.
+Erwartet: `PASS`. Nur dieser Loopback nutzt fest **115200 8N1, ohne Flow-Control**; das eigentliche Flashwerkzeug wählt ggf. eine andere UART-Datenrate. Jumperbrücke TXD↔RXD anschließend entfernen.
 
-| Result | Meaning |
-|---|---|
-| `PASS`, exit 0 | Adapter TXD/RXD loopback works |
-| `FAIL`, exit 1 | Received data differ or are missing |
-| Exit 2 | Port, permissions or OS error |
+## 4. CEN-Reset im richtigen Moment
 
-Remove the TXD-RXD bridge before connecting the projector.
-
-## 4. Dupont wiring to the projector
-
-Use individual **2.54 mm Dupont leads** with the connector gender matching the actual adapter header and the verified PCB connection method. Do not force Dupont female sockets onto bare PCB solder pads.
-
-| FT232 header signal | Projector UART signal | Connection |
-|---|---|---|
-| **GND** | **GND** | Common ground |
-| **TXD (output)** | **RX (input)** | Crossed |
-| **RXD (input)** | **TX (output)** | Crossed |
-| **VCC / 3V3 / 5V** | Not connected | **Do not connect** |
-| **RTS / CTS / DTR** | Not connected | **Do not connect** |
-
-Connect by verified signal labels, not by an assumed connector order. A physical pin-numbered drawing must be based on the actual hardware.
-
-The target is a BlissLights Evolve with a CBU/BK7231N and 2 MiB flash. Disconnect all power before attaching leads. Confirm a safe power/reset procedure before attempting a read-only bootloader handshake. **Do not flash until wiring and power are verified.**
-
-## 5. Confirm the flashing tool
+1. Verdrahtung wie oben kontrollieren; Projektor mit geeigneter Spannung versorgen und den USB-UART-Anschluss verbinden.
+2. **Verbindungsversuch starten** (beispielsweise nur lesend mit dem Chip-Info-Befehl).
+3. Während `ltchiptool` auf den BK7231N wartet, **verifiziertes CEN kurz mit GND verbinden und wieder lösen**.
+4. Nur bei bestätigtem Chiptyp **BK7231N** und Flashkapazität **2 MiB** fortfahren.
 
 ```bash
-bash scripts/setup-linux.sh
-.venv/bin/ltchiptool --help
-.venv/bin/ltchiptool flash --help
-.venv/bin/ltchiptool flash write --help
+~/esphome-env/bin/ltchiptool flash info bk7231n -d /dev/ttyUSB0
 ```
 
-Use the installed tool's actual options for serial port, chip identification, reset timing and verification. **No write command is authorized by this document.**
+Der ursprüngliche erfolgreiche Schreibvorgang verwendete `~/esphome-env/bin/ltchiptool` und genau diesen UART-Transport. **Keinen neuen USB-UART-Adapter, keine zusätzliche Reset-Automatik und keine andere Toolchain erfinden, solange der vorhandene Weg funktioniert.** Ein Chip-Info-Aufruf schreibt keine Firmware.
+
+Der autorisierte Schreibaufruf steht je nach Dateityp **getrennt** in [Recovery A (RAW BIN)](recovery.md) bzw. [ESPHome B (UF2)](build.md). **Firmwarewrite nur nach ausdrücklicher Freigabe.**
