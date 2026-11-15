@@ -64,6 +64,32 @@ if [[ "${ESPHOME_BUILD_LOG_WORKER:-0}" != "1" ]]; then
   fi
   printf '\nBUILD_EXIT_CODE=%s\nTEE_EXIT_CODE=%s\n' "$worker_status" "$tee_status" | tee -a "$FULL_LOG"
 
+  # Optional, post-success cleanup. Only generated compiler intermediates are
+  # removed; finished UF2/BIN/ELF files, logs, secrets and venv are preserved.
+  if (( worker_status == 0 && tee_status == 0 )); then
+    cleanup_answer=""
+    if [[ -c /dev/tty ]]; then
+      printf '\nRemove temporary compiler files (*.o, *.d, *.a)? Firmware and logs will be kept. [yes/NO]: ' >/dev/tty
+      IFS= read -r cleanup_answer </dev/tty || cleanup_answer=""
+    fi
+    if [[ "$cleanup_answer" == "yes" ]]; then
+      BUILD_DIR="$WORKSPACE/firmware/esphome/.esphome/build/galaxy-lamp"
+      if [[ ! -d "$BUILD_DIR" || -L "$BUILD_DIR" ||
+            -L "$WORKSPACE/firmware/esphome/.esphome" ||
+            -L "$WORKSPACE/firmware/esphome/.esphome/build" ]]; then
+        printf 'TEMP_CLEANUP=failed (unexpected or symlinked build directory)\n' | tee -a "$FULL_LOG"
+        worker_status=1
+      elif find "$BUILD_DIR" -type f \( -name '*.o' -o -name '*.d' -o -name '*.a' \) -delete; then
+        printf 'TEMP_CLEANUP=done (compiler intermediates only; firmware and logs retained)\n' | tee -a "$FULL_LOG"
+      else
+        printf 'TEMP_CLEANUP=failed (could not remove some intermediate files)\n' | tee -a "$FULL_LOG"
+        worker_status=1
+      fi
+    else
+      printf 'TEMP_CLEANUP=skipped\n' | tee -a "$FULL_LOG"
+    fi
+  fi
+
   # Try to produce a separately redacted review file. If secrets cannot be
   # interpreted reliably, fail closed and leave only the private transcript.
   REDACT_PYTHON=""
