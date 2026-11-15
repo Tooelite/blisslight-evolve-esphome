@@ -179,6 +179,18 @@ cmp -s "$SECRETS_FIXTURE" "$WORKSPACE_FIXTURE/firmware/esphome/secrets.example.y
 [[ ! -e "$previous_log" ]]
 echo "PASS: empty secrets reinitialized; previous attempt logs cleared"
 
+printf ' \n \t\n' > "$SECRETS_FIXTURE"
+if ESPHOME_2024_LOGDIR="$FIXTURE_LOGDIR" ESPHOME_2024_VENV="$FIXTURE_VENV" \
+  bash "$ROOT/build-esphome-2024.sh" "$WORKSPACE_FIXTURE" \
+  </dev/null >"$TMP/whitespace-confirm.out" 2>&1; then
+  echo "ERROR: build continued without confirmation after whitespace-only secrets" >&2
+  exit 1
+fi
+cmp -s "$SECRETS_FIXTURE" "$WORKSPACE_FIXTURE/firmware/esphome/secrets.example.yaml"
+[[ "$(stat -c %a "$SECRETS_FIXTURE")" == "600" ]]
+echo "PASS: whitespace-only secrets reinitialized"
+
+
 # A deliberate 'yes' must still fail if the operator left template values.
 "$PYTHON" - "$ROOT/build-esphome-2024.sh" "$WORKSPACE_FIXTURE" "$FIXTURE_LOGDIR" "$FIXTURE_VENV" <<'PYFIXTURE'
 import os
