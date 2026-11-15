@@ -16,7 +16,7 @@ The script discovers a suitable Python executable. Some historical dependencies 
 
 The tracked [`secrets.example.yaml`](../firmware/esphome/secrets.example.yaml) contains placeholders for the five required keys. On each build, the script **automatically copies the template to `firmware/esphome/secrets.yaml` if that file is missing or empty**. It sets private permissions and never replaces a nonempty secrets file.
 
-The existing interactive confirmation displays the exact destination and all five keys. Edit the generated file with real credentials **before entering `yes`**; any other response aborts. Unchanged template placeholders are rejected even if `yes` is entered. The API encryption key must represent **32 bytes**. Generate a suitable key locally if necessary:
+The confirmation first shows the secrets file path and all five required keys. After the first exact `yes`, the **actual contents** of `secrets.yaml` are displayed directly on the local terminal (not recorded by `tee`). The script then asks **“Are these settings correct?”** and requires a **second exact `yes`**. Any other response aborts. Edit the generated file before confirming; unchanged template placeholders are rejected even after both confirmations. The API encryption key must represent **32 bytes**. Generate a suitable key locally if necessary:
 
 ```bash
 python3 -c 'import base64,secrets; print(base64.b64encode(secrets.token_bytes(32)).decode())'
@@ -33,7 +33,7 @@ bash scripts/test-build-logging.sh
 bash scripts/build-esphome-2024.sh
 ```
 
-The build script uses the source YAML alongside the script's project directory by default. It checks that the YAML exists and is nonempty, shows the paths to the YAML and local secrets, and lists all five required keys. **No Git checkout or fixed YAML hash is required:** the same files can be extracted and built from an ordinary directory. **Only the exact interactive response `yes`** permits environment creation, dependency installation, configuration and compilation. All other responses and noninteractive input abort.
+The build script uses the source YAML alongside the script's project directory by default. It checks that the YAML exists and is nonempty, shows the paths to the YAML and local secrets, and lists all five required keys. **No Git checkout or fixed YAML hash is required:** the same files can be extracted and built from an ordinary directory. **Both interactive confirmations must be exactly `yes`** before environment creation, dependency installation, configuration or compilation. Other responses and noninteractive input abort.
 
 Before confirmation, the script creates the private secrets file from the tracked template if necessary, without overwriting real values. After confirmation and a placeholder check, it selects Python, creates or reuses the isolated `.venv/`, installs/verifies **ESPHome 2024.4.1**, runs configuration and compilation, and reports UF2 candidates with sizes and SHA-256 hashes. **It does not flash the device.**
 
@@ -49,7 +49,7 @@ Before each run, the script deletes **only its own previous `build-*` logs** fro
 | `build-<run-id>.review.log` | Automatically redacted review copy; inspect manually before sharing |
 | Per-phase logs | Installation, configuration, compilation and UF2 discovery |
 
-Resolved `esphome config` output is stored privately rather than printed, because it may contain credentials. Errors are preserved even when `tee` completes successfully.
+Resolved `esphome config` output is stored privately rather than printed, because it may contain credentials. The explicit secrets review after the first `yes` is shown **only on the controlling terminal** via `/dev/tty`, bypassing `tee`, and does not enter the captured build transcript. **The values remain visible in terminal scrollback; run this only on a trusted local terminal.** Errors are preserved even when `tee` completes successfully.
 
 **Never publish raw private logs or `secrets.yaml`.** The review copy masks the configured secret values where recognized, but unrelated credentials may remain.
 
