@@ -1,4 +1,4 @@
-# BlissLights Evolve – technische Reinschrift v1.0
+# BlissLights Evolve – technische Reinschrift v1.1
 
 **Gerät:** BlissLights Evolve SKY-EVOLVE-B-RCWB, Tuya CBU / BK7231N, 2 MiB Flash.
 
@@ -28,6 +28,19 @@ Am 14.11.2026 wurde über FT232/UART ein anderes **ESPHome-2026-UF2** mit `ltchi
 
 **Zielgeräte-Backups:** Main `0x11000–0x1EDFFF` (1.953.792 B), Config `0x1EE000–0x1FFFFF` (73.728 B). Der eigene Bootloaderbereich `0x00000–0x10FFF` fehlt als Backup.
 
-**Sicherheit:** Das vollständige Fremd-BIN liegt nicht im öffentlichen Repository. Der geplante vollständige RAW-Restore überschreibt sämtliche 2 MiB **einschließlich Bootloader und gerätespezifischer Daten**. Ein solcher Write erfolgt ausschließlich nach expliziter Freigabe. Bisher weder Original-Recovery noch ESPHome-2024-Flash ausgeführt.
+**Archivierung:** Das Repository ist derzeit **privat**. Das Original-`tar.gz` soll unter `firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz` aus dem Forschungsrepository übernommen werden; bis zum manuellen Push liegt dort nur die README. Das extrahierte RAW-BIN bleibt außerhalb der Git-Historie. **Vor einer möglichen öffentlichen Freigabe** sind Urheber-/Weitergaberechte und gerätespezifische Daten des Fremddumps zu klären.
 
-**Status / Änderungsverlauf v1.0:** Vorherige Entwurfsanleitungen durch zwei eindeutig getrennte und nachvollziehbare Wege ersetzt; Quelle, nachgewiesene Analyse, Gerätekontakt und Grenzen konsolidiert. Kein Hardwarezugriff.
+**Flashrisiko:** Der geplante vollständige RAW-Restore überschreibt sämtliche 2 MiB **einschließlich Bootloader und gerätespezifischer Daten**. Ein solcher Write erfolgt ausschließlich nach expliziter Freigabe. Bisher weder Original-Recovery noch ESPHome-2024-Flash ausgeführt.
+
+## Credits und Dank
+
+**Vielen Dank an [Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html)** für die Veröffentlichung des vollständigen BK7231N-Evolve-Firmwaredumps am **17.06.2023 (Beitrag #3)** sowie für das Teilen der ESPHome-Galaxy-Evolve-YAML am **27.04.2024 (Beitrag #13)**. Ohne diese Beiträge wären der Original-Recovery-Ansatz und die Rekonstruktion der lokalen Projektorsteuerung deutlich schwieriger.
+
+Vielen Dank auch an **helge1** für den dokumentierten Praxistest der ESPHome-Konfiguration am **29.06.2024 (Beitrag #14)**.
+
+Die Quelle ist das [Elektroda-Forum zum BlissLights Evolve](https://www.elektroda.com/rtvforum/topic3984240.html); die Nennung stellt keine Aussage über eine erteilte Lizenz zur Weiterveröffentlichung der Hersteller-Firmware dar.
+
+## Änderungsverlauf
+
+- **v1.0 (15.11.2026):** Zwei getrennte Firmwarewege, Quellen und Analysestand konsolidiert.
+- **v1.1 (15.11.2026):** Firmware-Spender und Community-Praxistest mit Quellen genannt; geplante Archivübernahme in das private Repository und die Bedeutung von `0xDEAC0` präzisiert.
