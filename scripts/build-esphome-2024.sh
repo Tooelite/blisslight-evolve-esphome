@@ -111,8 +111,8 @@ else
 fi
 chmod 600 "$SECRETS"
 
-# Require explicit confirmation before venv creation, dependency installation
-# or compilation. The prompt lists the five keys without showing their values.
+# Two confirmations before venv creation, dependency installation or
+# compilation. Secret values are shown only on /dev/tty (not through tee).
 bash "$SCRIPT_DIR/confirm-esphome-secrets.sh" "$WORKSPACE" || die "Build aborted at the secrets confirmation gate"
 
 # A yes answer alone must never permit firmware with untouched placeholders.
