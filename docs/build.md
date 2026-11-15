@@ -1,6 +1,6 @@
 # Firmware B – build the complete Evolve image with ESPHome 2024.4.1
 
-**Working procedure v1.2 – 15 November 2026.** This document records the exact build sequence agreed for the next local attempt on Debian. **No ESPHome 2024.4.1 configuration validation, compilation, UF2 verification, or 2024-image flash has succeeded yet.** Update the steps only when the actual local logs justify a correction.
+**Working procedure v1.3 – 15 November 2026.** This document records the exact build sequence agreed for the next local attempt on Debian. **No ESPHome 2024.4.1 configuration validation, compilation, UF2 verification, or 2024-image flash has succeeded yet.** Update the steps only when the actual local logs justify a correction.
 
 **Current execution workspace:** `~/projekte/bliss-evolve-android` (the older research repository). This guide is maintained in `blisslight-evolve-esphome`, the canonical documentation repository. The firmware YAML is already **byte-identical** in both repositories, so the commands below deliberately keep the working path in the old repository while the first build is being validated. After a proven build, we can promote the checked procedure to run directly in this repository. Do not accidentally compile the obsolete ESPHome 2026 firmware.
 
@@ -19,32 +19,17 @@
 
 **Decision:** no change to the source YAML, functionality, GPIO mapping or fixed LibreTiny candidate unless a concrete failure in the source/build proves the need. Never replace missing secrets with fake network credentials. The previous ESPHome-2026 build is not a flash candidate.
 
-## 1. Confirm the source and install ESPHome 2024.4.1 on Debian
+## 1. Confirm the source and interpreter requirements
 
 The one active build source is [`galaxy-evolve-2024-v0.1.yaml`](../firmware/esphome/galaxy-evolve-2024-v0.1.yaml). Its Git blob is **`e099818947b7a7e8f1ae070ffffeae62e026af25`**, identical to the research repository. This is the complete configuration published by **Dawk323** on 27 April 2024 in the [Elektroda Evolve thread](https://www.elektroda.com/rtvforum/topic3984240.html), with user secrets externalized and the LibreTiny source fixed to candidate commit `d1386a8e9dcdeed4c50dd0628462b14c9295d304`. That commit is a reconstruction choice, **not** a proven exact historical dependency.
 
 Included functions: RGBW GPIO6/26/24/9, star laser GPIO8, motor GPIO7 with 15% minimum power, button GPIO14, status indicator GPIO0, and `Random` / `Random Slow` effects. The source's two `relative_brightness: 5%` branches remain unchanged.
 
-Run on Debian:
+**Confirmed on the target Debian host:** `/usr/bin/python3` reports **Python 3.13.5**. The earlier command `python3.11` failed simply because that executable name does not exist there; this did not prove Python was absent.
 
-```bash
-cd ~/projekte/bliss-evolve-android
+PyPI release metadata for `esphome==2024.4.1` specifies **Python >=3.9**, without an upper bound. However, the April 2024 dependency stack is **not verified on Python 3.13**. We therefore auto-discover the available interpreter instead of assuming a specific `python3.X` executable. The build script prefers available Python 3.12/3.11/3.10/3.9 and falls back to Python 3.13 (or a suitable `python3` alias). It checks the version before creating a virtual environment, and reports a specific dependency error if installation fails. **No system Python installation or upgrade is performed.**
 
-git pull --ff-only
-
-python3.11 --version
-
-# Create a Python environment separate from the existing ESPHome 2026 install.
-python3.11 -m venv ~/esphome-2024-env
-
-# Install the pinned ESPHome version.
-~/esphome-2024-env/bin/python -m pip install 'esphome==2024.4.1'
-
-# Confirm the exact installed version.
-~/esphome-2024-env/bin/esphome version
-```
-
-**Expected version output:** `Version: 2024.4.1`. A compatible local Python 3.11 installation is required for these commands. Stop and inspect any Python, package installation or version error rather than silently switching versions. The existing `~/esphome-env` remains untouched; it contains the `ltchiptool` used for the previously successful UART write.
+The build script lives in this canonical repository: [`scripts/build-esphome-2024.sh`](../scripts/build-esphome-2024.sh). It uses the historical firmware YAML in `~/projekte/bliss-evolve-android`, verifies the exact original Git blob, keeps `~/esphome-env` intact, and never flashes hardware. **Prepare real secrets (next section) before executing the build command in step 3.**
 
 ## 2. Check and protect the real local secrets
 
@@ -92,46 +77,31 @@ chmod 600 firmware/esphome/secrets.yaml
 
 ## 3. Validate and compile the original YAML
 
-Only after the secrets are present, run the following **unchanged build sequence** from the old repository. `set -euo pipefail` stops on the first failed command; `umask 077` ensures newly created logs are private. The commands do **not** flash or otherwise write to the projector.
+After the five real secrets are present, execute the following from Debian. **You do not need to guess the Python command name or install a particular Python minor version first.**
 
 ```bash
-cd ~/projekte/bliss-evolve-android
+# Make sure the canonical build script is available locally.
+git -C ~/projekte/blisslight-evolve-esphome pull --ff-only
 
-(
-  set -euo pipefail
-  umask 077
-
-  LOGDIR="$HOME/bliss-evolve-local/esphome-2024-build"
-  mkdir -p "$LOGDIR"
-
-  ESPHOME="$HOME/esphome-2024-env/bin/esphome"
-  YAML="firmware/esphome/galaxy-evolve-2024-v0.1.yaml"
-
-  test -s firmware/esphome/secrets.yaml
-
-  "$ESPHOME" config "$YAML" \
-    > "$LOGDIR/config.log" 2>&1
-
-  echo "CONFIG_OK"
-
-  "$ESPHOME" compile "$YAML" \
-    > "$LOGDIR/compile.log" 2>&1
-
-  echo "COMPILE_OK"
-
-  echo "=== UF2 files found ==="
-
-  find firmware/esphome \
-    -type f -name '*.uf2' \
-    -printf '%p | %s bytes\n'
-)
+# Work with the unchanged 2024 YAML in the historical repository.
+bash ~/projekte/blisslight-evolve-esphome/scripts/build-esphome-2024.sh \
+  ~/projekte/bliss-evolve-android
 ```
 
-Logs stay locally under `~/bliss-evolve-local/esphome-2024-build/`. A build may require internet access to fetch historical PlatformIO/LibreTiny components.
+The command automatically:
 
-Expected milestones are `CONFIG_OK`, `COMPILE_OK` and the actual path(s) of newly produced UF2 files. **These are expectations, not results.** If either step fails, inspect the precise error locally; do not mass-rewrite the YAML, update framework versions or reduce hardware features.
+1. Confirms the working repo and original firmware YAML Git blob.
+2. Discovers an installed Python 3.9–3.13 executable (preferring period-appropriate versions), **prints the selected interpreter and version**, and creates or checks the independent `~/esphome-2024-env` virtual environment.
+3. Installs **exactly ESPHome 2024.4.1**, or reuses it if already present and verified.
+4. Checks the real local secrets, Git ignore rule and file permissions.
+5. Runs `esphome config`, then `esphome compile`, with `set -Eeuo pipefail`, `umask 077` and protected logs.
+6. Searches for UF2 files **only within the expected `galaxy-lamp` build directory**, avoiding accidental selection of the old 2026 UF2.
 
-Record the installed ESPHome version, any relevant PlatformIO/SDK/toolchain versions, compile result, actual image path, image size and SHA-256 before the next milestone.
+Logs stay at `~/bliss-evolve-local/esphome-2024-build/` (`pip-install.log`, `config.log`, `compile.log`, `uf2-files.txt`). If a step fails, the script prints an explicit error and the local log path; it does **not** silently change ESPHome versions, recreate an existing environment, modify firmware functionality or access `/dev/ttyUSB0`.
+
+Expected milestones are `CONFIG_OK`, `COMPILE_OK`, and real UF2 path(s)/size. **These are expectations, not reported results.** The script does not perform an image safety check or flash. If either `config` or `compile` fails, inspect only the relevant redacted error lines, rather than pasting logs containing credentials.
+
+Record the actual Python executable/version, ESPHome version, PlatformIO/SDK versions, image path, size and SHA-256 before the next milestone.
 
 ## 4. Inspect the actual image before authorizing a flash
 
@@ -151,4 +121,5 @@ Once verified, record the actual build environment, corrections (if necessary), 
 
 ## Change log
 
-- **v1.2 (15 Nov 2026):** English working build procedure adopted from the currently agreed local instructions; source, secrets, isolated environment, exact error-stopping build commands, log handling, image QA, UART flash gate and post-flash checks captured. **No successful build or flash claimed.**
+- **v1.2 (15 Nov 2026):** English working build procedure recorded from the agreed local instructions.
+- **v1.3 (15 Nov 2026):** Replaced the unverified `python3.11` executable assumption with a Python-auto-detecting, error-stopping build script. Recorded Debian Python 3.13.5 and distinguished PyPI minimum-version metadata from actual historical dependency compatibility. **Build and flash still untested.**
