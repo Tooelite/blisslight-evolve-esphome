@@ -41,7 +41,7 @@ For a different source directory, pass its absolute path as the first argument. 
 
 ## 3. Build logs
 
-Before each run, the script deletes **only its own previous `build-*` logs** from the Git-ignored `.build-logs/` directory. An exclusive lock prevents concurrent builds from deleting one another's logs. Source files, secrets, the virtual environment, and compiled firmware are left untouched. Dependency installation and compilation progress appear live on the terminal and are captured using `tee`.
+Before each run, the script deletes **only its own previous `build-*` logs** from the Git-ignored `.build-logs/` directory. An exclusive lock prevents concurrent builds from deleting one another's logs. Source files, secrets, the virtual environment, and compiled firmware are left untouched. Save or review the previous `review.log` before starting another build, because older run logs are intentionally removed. Dependency installation and compilation progress appear live on the terminal and are captured using `tee`.
 
 | File | Contents |
 | --- | --- |
