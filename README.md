@@ -2,7 +2,7 @@
 
 **Gerät:** BlissLights Evolve SKY-EVOLVE-B-RCWB, Tuya CBU / BK7231N, 2 MiB Flash.
 
-Dieses Repository ist ab 15.11.2026 die **verbindliche, bereinigte Arbeitsgrundlage** für Wiederherstellung, ESPHome-Firmwarebau und Waveshare-FT232-Anschluss. Das frühere Repository `Tooelite/bliss-evolve-android` dient als **Quellen- und Belegarchiv** (historische Logs, eigene Teilbackups, fremder Firmwaredump), nicht mehr als maßgebliche Recovery-Anleitung. Kein Vermischen von alter Android-/Tuya-Forschung mit diesen Verfahren.
+Dieses Repository ist ab 15.11.2026 die **verbindliche, bereinigte Arbeitsgrundlage** für Wiederherstellung, ESPHome-Firmwarebau und Waveshare-FT232-Anschluss. Das frühere Repository `Tooelite/bliss-evolve-android` dient als **Quellen- und Belegarchiv** (historische Logs, eigene Teilbackups, fremder Firmwaredump), nicht mehr als maßgebliche Recovery-Anleitung. Kein Vermischen von alter Android-/Tuya-Forschung mit diesen Verfahren. **Übergang:** Der erste ESPHome-2024.4.1-Testbuild wird noch im lokalen alten Repository ausgeführt; die geprüfte Anleitung und spätere erfolgreiche Korrekturen werden hier verbindlich dokumentiert.
 
 ## Zwei getrennte Firmwarewege
 
