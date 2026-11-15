@@ -1,0 +1,164 @@
+# Source-based reconstruction of the publicly reported Evolve YAML (27 Apr 2024).
+# Deliberate deviations: user secrets are external, the originally moving
+# LibreTiny `version: dev` is replaced with a fixed 2024-04-27 candidate commit.
+# DO NOT assume this file is a tested or flash-approved firmware image.
+esphome:
+  name: galaxy-lamp
+  friendly_name: Galaxy Evolve
+
+globals:
+  - id: dim
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+bk72xx:
+  board: cbu
+  framework:
+    version: '0.0.0'
+    source: https://github.com/libretiny-eu/libretiny.git#d1386a8e9dcdeed4c50dd0628462b14c9295d304
+
+logger:
+
+api:
+  encryption:
+    key: !secret evolve_2024_api_key
+
+ota:
+  password: !secret evolve_2024_ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: Galaxy-Evolve
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+text_sensor:
+  - platform: libretiny
+    version:
+      name: LibreTiny Version
+
+light:
+  - platform: rgbw
+    id: rgbw_light
+    name: rgb Light
+    icon: mdi:star-shooting
+    red: red
+    green: green
+    blue: blue
+    white: white
+    restore_mode: RESTORE_DEFAULT_OFF
+    default_transition_length: 2s
+    effects:
+      - random:
+          name: Random
+          transition_length: 5s
+          update_interval: 5s
+      - random:
+          name: Random Slow
+          transition_length: 10s
+          update_interval: 5s
+  - platform: monochromatic
+    id: laser
+    name: Star Laser
+    icon: mdi:laser-pointer
+    output: laser_pwm
+    restore_mode: ALWAYS_OFF
+    default_transition_length: 3s
+  - platform: status_led
+    id: star_status_led
+    name: Star Status Led
+    icon: mdi:led-outline
+    entity_category: diagnostic
+    pin: GPIO0
+    internal: true
+
+fan:
+  platform: speed
+  name: Star Motor
+  icon: mdi:play-speed
+  id: motor
+  output: motor_pwm
+  restore_mode: ALWAYS_OFF
+
+output:
+  - platform: libretiny_pwm
+    id: red
+    pin: GPIO6
+    inverted: false
+  - platform: libretiny_pwm
+    id: green
+    pin: GPIO26
+    inverted: false
+  - platform: libretiny_pwm
+    id: blue
+    pin: GPIO24
+    inverted: false
+  - platform: libretiny_pwm
+    id: white
+    pin: GPIO9
+    inverted: false
+  - platform: libretiny_pwm
+    id: laser_pwm
+    pin: GPIO8
+    inverted: false
+  - platform: libretiny_pwm
+    id: motor_pwm
+    pin: GPIO7
+    min_power: 15%
+
+binary_sensor:
+  - platform: gpio
+    id: star_button
+    name: Star Button
+    pin:
+      number: GPIO14
+      mode: INPUT_PULLDOWN_16
+      inverted: false
+    on_multi_click:
+      - timing:
+          - ON for at most 1s
+          - OFF for at least 0.350s
+        then:
+          - light.toggle: rgbw_light
+      - timing:
+          - ON for at most 1s
+          - OFF for at most 0.35s
+          - ON for at most 1s
+          - OFF for at least 0.35s
+        then:
+          - light.toggle: laser
+    # Reproduces the 2024 forum code, including its apparent +5%/+5% dim issue.
+    on_press:
+      then:
+        - if:
+            condition:
+              lambda: |-
+                return id(dim);
+            then:
+              - delay: 0.1s
+              - while:
+                  condition:
+                    binary_sensor.is_on: star_button
+                  then:
+                    - light.dim_relative:
+                        id: rgbw_light
+                        relative_brightness: 5%
+                    - delay: 0.1s
+              - lambda: |-
+                  id(dim) = (false);
+            else:
+              - delay: 0.1s
+              - while:
+                  condition:
+                    binary_sensor.is_on: star_button
+                  then:
+                    - light.dim_relative:
+                        id: rgbw_light
+                        relative_brightness: 5%
+                    - delay: 0.1s
+              - lambda: |-
+                  id(dim) = (true);
