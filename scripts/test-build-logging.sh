@@ -129,8 +129,8 @@ print("PASS: only exact yes passes and all five secret keys and paths are displa
 PYTEST
 
 
-# Exercise real build-entry handling in a temporary Git checkout. The test
-# aborts at secret confirmation (or placeholder validation): no pip/compile.
+# Exercise real build-entry handling in an ordinary directory WITHOUT Git.
+# The test aborts at secret confirmation/placeholder validation: no pip/compile.
 WORKSPACE_FIXTURE="$TMP/workspace"
 FIXTURE_LOGDIR="$TMP/buildlogs"
 FIXTURE_VENV="$TMP/build-venv"
@@ -139,12 +139,7 @@ cp "$ROOT/../firmware/esphome/galaxy-evolve-2024-v0.1.yaml" \
    "$WORKSPACE_FIXTURE/firmware/esphome/"
 cp "$ROOT/../firmware/esphome/secrets.example.yaml" \
    "$WORKSPACE_FIXTURE/firmware/esphome/"
-printf '**/secrets.yaml\n' > "$WORKSPACE_FIXTURE/.gitignore"
-git -C "$WORKSPACE_FIXTURE" init -q
-git -C "$WORKSPACE_FIXTURE" add .gitignore firmware/esphome/galaxy-evolve-2024-v0.1.yaml \
-   firmware/esphome/secrets.example.yaml
-git -C "$WORKSPACE_FIXTURE" -c user.name=Fixture \
-   -c user.email=fixture@example.invalid commit -q -m fixture
+[[ ! -e "$WORKSPACE_FIXTURE/.git" ]]
 SECRETS_FIXTURE="$WORKSPACE_FIXTURE/firmware/esphome/secrets.yaml"
 
 printf 'obsolete log\n' > "$FIXTURE_LOGDIR/build-19990101T000000Z-1.full-private.log"
