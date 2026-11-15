@@ -87,6 +87,17 @@ printf 'ACTUAL_YAML_GIT_BLOB=%s\n' "$actual_blob"
 [[ "$actual_blob" == "$EXPECTED_YAML_BLOB" ]] || die "YAML differs from verified source; do not auto-modify it"
 git -C "$WORKSPACE" rev-parse --short HEAD
 
+# Mandatory human gate before venv creation, package installation or compilation.
+# Read one answer from the terminal (not from a pipe or automation).
+bash "$SCRIPT_DIR/confirm-esphome-secrets.sh" "$WORKSPACE" || die "Build aborted at the secrets confirmation gate"
+
+stage "Check local secrets without printing their values"
+SECRETS="$WORKSPACE/firmware/esphome/secrets.yaml"
+[[ -s "$SECRETS" ]] || die "SECRETS_MISSING: create $SECRETS with real credentials"
+git -C "$WORKSPACE" check-ignore -q "$SECRETS" || die "Secrets are NOT Git-ignored"
+chmod 600 "$SECRETS"
+printf 'SECRETS_PRESENT_AND_IGNORED\n'
+
 stage "Select installed Python"
 is_candidate() {
   "$1" -c 'import sys; v=sys.version_info; raise SystemExit(0 if v.major == 3 and 9 <= v.minor <= 13 else 1)' >/dev/null 2>&1
@@ -126,13 +137,6 @@ fi
 VERSION="$("$ESPHOME" version 2>&1)" || die "Installed ESPHome cannot start"
 printf '%s\n' "$VERSION"
 printf '%s\n' "$VERSION" | grep -Fq 'Version: 2024.4.1' || die "Wrong ESPHome version"
-
-stage "Check local secrets without printing their values"
-SECRETS="$WORKSPACE/firmware/esphome/secrets.yaml"
-[[ -s "$SECRETS" ]] || die "SECRETS_MISSING: create $SECRETS with real credentials"
-git -C "$WORKSPACE" check-ignore -q "$SECRETS" || die "Secrets are NOT Git-ignored"
-chmod 600 "$SECRETS"
-printf 'SECRETS_PRESENT_AND_IGNORED\n'
 
 stage "Validate configuration (private output only)"
 YAML="$WORKSPACE/$YAML_REL"

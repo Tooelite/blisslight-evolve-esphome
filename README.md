@@ -1,4 +1,4 @@
-# BlissLights Evolve – technische Reinschrift v1.4
+# BlissLights Evolve – technische Reinschrift v1.5
 
 **Gerät:** BlissLights Evolve SKY-EVOLVE-B-RCWB, Tuya CBU / BK7231N, 2 MiB Flash.
 
@@ -9,14 +9,14 @@ Dieses Repository ist ab 15.11.2026 die **verbindliche, bereinigte Arbeitsgrundl
 | Weg | Quelle | Zweck | Stand |
 | --- | --- | --- | --- |
 | **A · Original-Recovery** | Vollständiger 2-MiB-Community-BIN-Dump | Wiederherstellung der originalen Beken/Tuya-Firmware | BIN identifiziert, Bootloader-RBL geprüft, UART-Rohschreiben im Werkzeugcode belegt; **noch nicht am Gerät ausgeführt** |
-| **B · Eigene ESPHome-Firmware** | `firmware/esphome/galaxy-evolve-2024-v0.1.yaml` | Lokale RGBW-, Laser-, Motor- und Tastensteuerung | Quellstand gesichert; **englische Buildanleitung v1.4 mit Live-Logs und geschütztem Review-Log; lokaler Build noch offen** |
+| **B · Eigene ESPHome-Firmware** | `firmware/esphome/galaxy-evolve-2024-v0.1.yaml` | Lokale RGBW-, Laser-, Motor- und Tastensteuerung | Quellstand gesichert; **englische Buildanleitung v1.5 mit zwingender Secrets-Bestätigung (`yes`), Live-Logs und Review-Log; lokaler Build noch offen** |
 
 Beide Wege verwenden denselben **Waveshare 6170 / FT232 → BK7231N UART1**-Zugang, manuelles CEN-Reset und `ltchiptool flash write -c`. Für **A** ist das Eingabeformat **RAW BIN** mit expliziten Adressen; für **B** ist es ein erst noch zu bauendes **UF2** mit dessen Mapping. **Nicht verwechseln.**
 
 ## Einzige aktuellen Anleitungen
 
 - [A – Recovery aus dem vollständigen Original-Fremddump](docs/recovery.md)
-- [B – ESPHome 2024.4.1: English build procedure, Python autodetection, live logs, redacted review log, UF2 QA](docs/build.md)
+- [B – ESPHome 2024.4.1: English build procedure, mandatory secrets confirmation, live logs, review log, UF2 QA](docs/build.md)
 - [Waveshare 6170: 3,3-V-UART, Verdrahtung, CEN/Reset und Debian](docs/wiring.md)
 - [Fehlerfälle](docs/troubleshooting.md)
 
@@ -46,4 +46,5 @@ Die Quelle ist das [Elektroda-Forum zum BlissLights Evolve](https://www.elektrod
 - **v1.1 (15.11.2026):** Firmware-Spender und Community-Praxistest mit Quellen genannt; Archivübernahme vorbereitet und Bedeutung von `0xDEAC0` präzisiert.
 - **v1.2 (15.11.2026):** Englische ESPHome-2024.4.1-Buildanleitung mit isolierter Umgebung, echten lokalen Secrets, geschützten Logs, UF2-QS und Flashfreigabe festgehalten. Vollständiges Fremd-BIN-Archiv liegt in Git.
 - **v1.3 (15.11.2026):** Fehler `python3.11: command not found` auf Debian erfasst; tatsächlich installiertes `/usr/bin/python3` ist 3.13.5. [Automatisch erkennendes Buildskript](scripts/build-esphome-2024.sh) und englische Anleitung statt hartcodierter Python-Version.
-- **v1.4 (15.11.2026):** Laufbezogenes vollständiges privates Buildprotokoll mit Live-Ausgabe durch `tee`, separate sekretbereinigte Prüfkopie und [lokaler Logging-Selbsttest](scripts/test-build-logging.sh). Kein ESPHome-2024-Compile oder Flash nachgewiesen.
+- **v1.4 (15.11.2026):** Laufbezogenes vollständiges privates Buildprotokoll mit Live-Ausgabe durch `tee`, separate sekretbereinigte Prüfkopie und [lokaler Logging-Selbsttest](scripts/test-build-logging.sh).
+- **v1.5 (15.11.2026):** [Interaktive Secrets-Freigabe](scripts/confirm-esphome-secrets.sh) vor Python-Umgebung, Paketinstallation und Build. Beide lokalen Dateipfade und fünf Geheimnisschlüssel werden angezeigt; ausschließlich die Eingabe `yes` erlaubt die Fortsetzung. Andere oder fehlende Eingaben brechen ab. Kein ESPHome-2024-Compile oder Flash nachgewiesen.
