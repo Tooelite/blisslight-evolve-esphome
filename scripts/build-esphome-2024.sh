@@ -34,7 +34,7 @@ if [[ "${ESPHOME_BUILD_LOG_WORKER:-0}" != "1" ]]; then
     \) -delete || die "Failed to remove logs from the previous build"
   printf 'PREVIOUS_BUILD_LOGS_CLEARED=%s\n' "$LOGDIR"
 
-  RUN_ID="$(date -u '+%Y%m%dT%H%M%SZ')-$"
+  RUN_ID="$(date -u '+%Y%m%dT%H%M%SZ')-$$"
   export ESPHOME_BUILD_LOG_WORKER=1
   export ESPHOME_BUILD_RUN_ID="$RUN_ID"
   export ESPHOME_BUILD_CONFIG_LOG="$LOGDIR/build-$RUN_ID.config-private.log"
