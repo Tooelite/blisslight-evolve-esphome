@@ -1,6 +1,6 @@
 # Recovery steps – full 2 MiB stock BIN using the proven FT232/UART path
 
-**Status: procedure established from source code; full-BIN write and device recovery NOT tested or authorized.**
+**Status (15 Nov 2026): complete BIN hash verified; a bootloader RBL and application scan detected; write ranges and device recovery NOT tested or authorized.**
 
 ## 1. Source image and preflight
 
@@ -16,7 +16,7 @@ The recovery source is the complete community BK7231N stock firmware image from 
 python3 scripts/check-image.py firmware/recovery/recovery-image.bin
 ```
 
-**STOP** if the checksum or length differs. This check establishes image identity **only**; it does not establish that offsets 0–0x10FFF hold a valid bootloader, or that the dump is compatible with the target.
+**STOP** if the checksum or length differs. This check establishes image identity **only**; it does not establish bootloader compatibility or permission to flash.
 
 **Mandatory read-only boot/layout evidence:**
 
@@ -24,7 +24,24 @@ python3 scripts/check-image.py firmware/recovery/recovery-image.bin
 bk7231tools dissect_dump firmware/recovery/recovery-image.bin
 ```
 
-This analyzer can identify RBL containers such as `bootloader` and `app` when present. Verify that the expected bootloader and application regions are detected at plausible BK7231N offsets, cross-check the actual bytes and flash-partition map, and do not infer a valid bootloader from file size alone. Detection alone is not a complete proof of executable integrity. Keep the result as evidence before deciding what to write.
+**Actual result on 15 Nov 2026 (local Debian, read-only):** the extracted 2 MiB image matches the expected SHA-256 exactly. `bk7231tools dissect_dump` (default layout `ota_1`) reports:
+
+```text
+RBL containers:
+    0x10f9a: bootloader - [encoding_algorithm=NONE, size=0xea20]
+Missing app RBL container. Using a scan pattern instead
+    0x11000: app - [NO RBL, size=0xdeac0]
+Storage partition:
+    0x1ee000: 32 KiB - 12 keys
+```
+
+**Source-code interpretation:**
+
+- `0x10F9A` is the **RBL header position near the end** of the `0x000000–0x010FFF` boot partition, **not** a bootloader entry address or the beginning of the firmware. The parser validates RBL header CRC and payload CRC before reporting a named, non-null `bootloader` payload. This is strong evidence of intact bootloader content in the foreign file, **not** proof it can run on this specific unit.
+- `0x011000` is the app **start specified by the analyzer's default `ota_1` layout**. It is consistent with the earlier UF2 write start, but an independent full-image partition/layout check is still needed. `0xDEAC0` is the CRC-stripped **extracted payload size**, **not** the physical app partition length or the range to write.
+- `0x1EE000` marks detected 32 KiB Tuya key-value storage. The additional end-of-flash bytes are not automatically classified as safe to overwrite. Preserve identity, calibration and settings by default.
+
+**Next read-only step:** independently examine the app's physical CRC-block continuity, padding and partition boundary. Cross-check against the known local main/config backup segmentation and the alternative `ota_big` layout; only then select exact sectors for a possible application-only write. **No full-chip write and no inferred offset shifting.**
 
 ## 2. Reuse the successful UART transport and reset
 
@@ -52,7 +69,7 @@ Require chip **BK7231N** and flash size **2 MiB**. If those differ, STOP.
 
 ## 3. Critical bootloader and partition decision – do not skip
 
-**We have not proved that the foreign BIN contains a valid bootloader.** A 2 MiB file may contain a full address-space dump without guaranteeing every region contains correct executable data. **Do not write the full file at chip address `0x000000` until bootloader bytes and complete addressing have been confirmed.**
+**The foreign BIN contains a parsed bootloader RBL with validated header/payload CRC, but runnability and compatibility with this device remain unproven.** A 2 MiB dump containing a valid RBL does not authorize replacing the currently responsive bootloader. **Do not write the full file at chip address `0x000000`.**
 
 - `0x000000–0x010FFF`: the existing, currently responding UART bootloader region. The own-device backups do **not** include it. Preserve this region by default.
 - Application region: determine the true start and end offsets from the foreign image and the existing BK7231N layout. The previously successful UF2 transfer began at `0x011000`; this is evidence of the earlier UF2 layout, **not** automatic proof of the foreign BIN's layout.
@@ -65,7 +82,7 @@ Require chip **BK7231N** and flash size **2 MiB**. If those differ, STOP.
 
 A raw flash image is **not** a UF2 package. The existing `ltchiptool flash write` code supports raw-BIN input with explicit chip family (`-f bk7231n`), start address (`-s`) and optional input offset (`-S`) and length (`-l`). CRC verification (`-c`) is implemented in the existing writer.
 
-**No complete `-s 0x000000 -l 0x200000` command is approved or recommended.** The archived 2 MiB image has not yet been analyzed for bootloader contents, and overwriting a responsive bootloader with unverified data could disable the UART recovery path.
+**No complete `-s 0x000000 -l 0x200000` command is approved or recommended.** A foreign bootloader RBL was detected and CRC-checked, but its compatibility is unknown; overwriting the existing bootloader could disable the working UART recovery path.
 
 After the read-only analysis identifies a suitable app-only range, a reviewed write command must maintain **the original mapping:** file offset = target flash offset for a raw full dump. For example, if a region begins at `0x011000`, both `-s 0x011000` and `-S 0x011000` are needed, and `-l` must equal the specifically approved region length. This is an **illustration of address mapping, not a flash command or approval**. Never invent a range or blindly use the file's full 2 MiB length.
 
