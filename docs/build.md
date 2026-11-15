@@ -80,10 +80,13 @@ chmod 600 firmware/esphome/secrets.yaml
 After the five real secrets are present, execute the following from Debian. **You do not need to guess the Python command name or install a particular Python minor version first.**
 
 ```bash
-# Make sure the canonical build script is available locally.
+# Make sure the canonical build scripts are available locally.
 git -C ~/projekte/blisslight-evolve-esphome pull --ff-only
 
-# Work with the unchanged 2024 YAML in the historical repository.
+# Read-only logging QA first: syntax, redaction with dummy secrets, pipefail.
+bash ~/projekte/blisslight-evolve-esphome/scripts/test-build-logging.sh
+
+# Run the unchanged 2024 YAML build in the historical repository.
 bash ~/projekte/blisslight-evolve-esphome/scripts/build-esphome-2024.sh \
   ~/projekte/bliss-evolve-android
 ```
@@ -110,7 +113,7 @@ Each invocation creates a new unique run ID, with files under `~/bliss-evolve-lo
 
 **On-screen progress:** Python selection, package installation, warnings, compiler output, failure messages, and UF2 discovery are displayed as they happen **and** recorded by `tee`. **Exception:** raw resolved `esphome config` output is withheld from the screen because it can reveal Wi-Fi/API passwords; the terminal shows `CONFIG_RUNNING` and then `CONFIG_OK` or `CONFIG_FAILED` instead. Its full output is nonetheless saved in the private transcript.
 
-**Error correctness:** Bash `pipefail` and explicit `PIPESTATUS` handling preserve the failed command's exit code even if `tee` succeeded. Any `tee` failure invalidates the run. A new run never overwrites a previous run's log.
+**Error correctness:** Bash `pipefail` and explicit `PIPESTATUS` handling preserve the failed command's exit code even if `tee` succeeded. The local `scripts/test-build-logging.sh` checks Bash/Python syntax, redaction using **dummy test secrets**, fail-closed behavior and upstream error propagation; it **does not compile or flash anything**. Run it before the build. Any `tee` failure invalidates the run. A new run never overwrites a previous run's log.
 
 **Redaction limits:** `scripts/redact-esphome-build-log.py` attempts to remove the five YAML secret values in plain/quoted/URL-encoded form. Unknown credentials (e.g. private package-index tokens, serials, build flags) may remain. The script **refuses to create a review log** if the secrets are missing or cannot be parsed safely. **Inspect `build-<run-id>.review.log` for sensitive content before sharing it with ChatGPT.**
 
