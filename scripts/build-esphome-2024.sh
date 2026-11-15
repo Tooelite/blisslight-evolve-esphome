@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build-only: does not access /dev/ttyUSB*, CEN, or write firmware to hardware.
+# Build-only: does not access /dev/ttyUSB*, CEN or write projector firmware.
 set -Eeuo pipefail
 umask 077
 
@@ -8,84 +8,154 @@ VENV="${ESPHOME_2024_VENV:-$HOME/esphome-2024-env}"
 LOGDIR="$HOME/bliss-evolve-local/esphome-2024-build"
 YAML_REL="firmware/esphome/galaxy-evolve-2024-v0.1.yaml"
 EXPECTED_YAML_BLOB="e099818947b7a7e8f1ae070ffffeae62e026af25"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+stage() { printf '\n===== %s =====\n' "$*"; }
 
+# Each invocation gets fresh protected files. tee shows worker stdout/stderr
+# on screen AND saves them. PIPESTATUS ensures a failed build remains failed.
+if [[ "${ESPHOME_BUILD_LOG_WORKER:-0}" != "1" ]]; then
+  mkdir -p "$LOGDIR" || die "Cannot create log directory: $LOGDIR"
+  RUN_ID="$(date -u '+%Y%m%dT%H%M%SZ')-$$"
+  export ESPHOME_BUILD_LOG_WORKER=1
+  export ESPHOME_BUILD_RUN_ID="$RUN_ID"
+  export ESPHOME_BUILD_CONFIG_LOG="$LOGDIR/build-$RUN_ID.config-private.log"
+  FULL_LOG="$LOGDIR/build-$RUN_ID.full-private.log"
+  REVIEW_LOG="$LOGDIR/build-$RUN_ID.review.log"
+
+  {
+    printf 'BUILD_RUN_ID=%s\nLIVE_OUTPUT=enabled\n' "$RUN_ID"
+    printf 'PRIVATE_FULL_LOG=%s\n' "$FULL_LOG"
+    printf 'REVIEW_LOG_PLANNED=%s\n' "$REVIEW_LOG"
+    printf 'CONFIG_OUTPUT=private_only (resolved config can contain credentials)\n'
+  } | tee "$FULL_LOG"
+
+  set +e
+  bash "$0" "$@" 2>&1 | tee -a "$FULL_LOG"
+  statuses=( "${PIPESTATUS[@]}" )
+  set -e
+  worker_status="${statuses[0]}"
+  tee_status="${statuses[1]}"
+
+  # Config prints resolved secrets: append its full, unfiltered output only
+  # to the private transcript, never to the terminal.
+  if [[ -f "$ESPHOME_BUILD_CONFIG_LOG" ]]; then
+    {
+      printf '\n===== ESPHOME CONFIG RAW OUTPUT (PRIVATE; APPENDED AFTER BUILD) =====\n'
+      cat "$ESPHOME_BUILD_CONFIG_LOG"
+    } >>"$FULL_LOG"
+  fi
+  printf '\nBUILD_EXIT_CODE=%s\nTEE_EXIT_CODE=%s\n' "$worker_status" "$tee_status" | tee -a "$FULL_LOG"
+
+  # Try to produce a separately redacted review file. If secrets cannot be
+  # interpreted reliably, fail closed and leave only the private transcript.
+  REDACT_PYTHON=""
+  if [[ -x "$VENV/bin/python" ]]; then
+    REDACT_PYTHON="$VENV/bin/python"
+  else
+    for candidate in python3 python3.13 python3.12 python3.11 python3.10 python3.9; do
+      if command -v "$candidate" >/dev/null 2>&1; then
+        REDACT_PYTHON="$(command -v "$candidate")"
+        break
+      fi
+    done
+  fi
+  if [[ -n "$REDACT_PYTHON" ]] && "$REDACT_PYTHON" "$SCRIPT_DIR/redact-esphome-build-log.py" \
+      --input "$FULL_LOG" --secrets "$WORKSPACE/firmware/esphome/secrets.yaml" \
+      --output "$REVIEW_LOG"; then
+    printf 'REVIEW_LOG=%s\n' "$REVIEW_LOG"
+    printf 'WARNING=Inspect review log for other sensitive values before sharing.\n'
+  else
+    printf 'REVIEW_LOG_NOT_CREATED=redaction failed; do not share the private log.\n' >&2
+  fi
+  printf 'PRIVATE_FULL_LOG=%s\n' "$FULL_LOG"
+  if (( tee_status != 0 )); then
+    printf 'ERROR: tee failed (code %s); build result cannot be accepted.\n' "$tee_status" >&2
+    exit "$tee_status"
+  fi
+  exit "$worker_status"
+fi
+
+stage "Source preflight"
+printf 'WORKSPACE=%s\nRUN_ID=%s\n' "$WORKSPACE" "$ESPHOME_BUILD_RUN_ID"
 [[ -d "$WORKSPACE/.git" ]] || die "Not a Git checkout: $WORKSPACE"
-[[ -f "$WORKSPACE/$YAML_REL" ]] || die "Missing source YAML: $WORKSPACE/$YAML_REL"
-command -v git >/dev/null 2>&1 || die "Git not installed"
-actual_blob="$(git -C "$WORKSPACE" hash-object "$YAML_REL")"
-[[ "$actual_blob" == "$EXPECTED_YAML_BLOB" ]] || die "Unexpected YAML changes ($actual_blob). Review source before updating the build procedure."
+[[ -f "$WORKSPACE/$YAML_REL" ]] || die "Missing YAML: $WORKSPACE/$YAML_REL"
+command -v git >/dev/null 2>&1 || die "Git is unavailable"
+actual_blob="$(git -C "$WORKSPACE" hash-object "$YAML_REL")" || die "Cannot hash YAML"
+printf 'ACTUAL_YAML_GIT_BLOB=%s\n' "$actual_blob"
+[[ "$actual_blob" == "$EXPECTED_YAML_BLOB" ]] || die "YAML differs from verified source; do not auto-modify it"
+git -C "$WORKSPACE" rev-parse --short HEAD
 
-# PyPI metadata for esphome==2024.4.1 declares Python >=3.9.
-# Prefer the 2024-era runtimes; use 3.13 only if no older compatible interpreter exists.
-# The older dependency stack may still fail on 3.13 despite satisfying metadata.
+stage "Select installed Python"
 is_candidate() {
   "$1" -c 'import sys; v=sys.version_info; raise SystemExit(0 if v.major == 3 and 9 <= v.minor <= 13 else 1)' >/dev/null 2>&1
 }
-
 if [[ -d "$VENV" ]]; then
-  [[ -x "$VENV/bin/python" ]] || die "Existing environment is incomplete: $VENV (not overwritten)"
-  is_candidate "$VENV/bin/python" || die "Existing environment uses an unchecked Python version: $VENV"
-  printf 'USING_EXISTING_ENV=%s\n' "$VENV"
+  [[ -x "$VENV/bin/python" ]] || die "Incomplete existing venv (preserved): $VENV"
+  is_candidate "$VENV/bin/python" || die "Existing venv has an unchecked Python version"
+  printf 'USING_EXISTING_VENV=%s\n' "$VENV"
 else
   PYTHON=""
-  for cmd in python3.12 python3.11 python3.10 python3.9 python3.13 python3; do
-    if command -v "$cmd" >/dev/null 2>&1 && is_candidate "$cmd"; then
-      PYTHON="$(command -v "$cmd")"
+  for candidate in python3.12 python3.11 python3.10 python3.9 python3.13 python3; do
+    if command -v "$candidate" >/dev/null 2>&1 && is_candidate "$candidate"; then
+      PYTHON="$(command -v "$candidate")"
       break
     fi
   done
-  [[ -n "$PYTHON" ]] || die "No usable Python 3.9–3.13 interpreter found; no installation attempted"
+  [[ -n "$PYTHON" ]] || die "No usable Python 3.9–3.13. No installation attempted."
   printf 'SELECTED_PYTHON=%s\n' "$PYTHON"
   "$PYTHON" --version
-  "$PYTHON" -m venv "$VENV" || die "venv creation failed using $PYTHON (check venv/ensurepip, without modifying system Python)"
+  "$PYTHON" -m venv "$VENV" || die "venv creation failed with $PYTHON; check ensurepip/venv"
 fi
 
 VENV_PYTHON="$VENV/bin/python"
 ESPHOME="$VENV/bin/esphome"
-"$VENV_PYTHON" -m pip --version >/dev/null 2>&1 || die "No pip inside $VENV"
-
-mkdir -p "$LOGDIR"
-printf 'BUILD_LOG_DIR=%s\n' "$LOGDIR"
-printf 'ENV_PYTHON='
 "$VENV_PYTHON" --version
+"$VENV_PYTHON" -m pip --version || die "pip missing from venv"
 
-# Avoid repeated pip work if the desired version is already available.
+stage "Pin and verify ESPHome 2024.4.1"
+PIP_LOG="$LOGDIR/build-$ESPHOME_BUILD_RUN_ID.pip-private.log"
 if [[ ! -x "$ESPHOME" ]] || ! "$ESPHOME" version 2>/dev/null | grep -Fq 'Version: 2024.4.1'; then
-  if ! "$VENV_PYTHON" -m pip install --disable-pip-version-check 'esphome==2024.4.1' >"$LOGDIR/pip-install.log" 2>&1; then
-    die "PIP_INSTALL_FAILED: inspect $LOGDIR/pip-install.log; do not change ESPHome/Python versions blindly"
+  if ! "$VENV_PYTHON" -m pip install --disable-pip-version-check 'esphome==2024.4.1' 2>&1 | tee "$PIP_LOG"; then
+    die "PIP_INSTALL_FAILED: inspect $PIP_LOG"
   fi
+else
+  printf 'PIP_INSTALL_SKIPPED=installed ESPHome already matches\n'
 fi
-
 VERSION="$("$ESPHOME" version 2>&1)" || die "Installed ESPHome cannot start"
 printf '%s\n' "$VERSION"
-printf '%s\n' "$VERSION" | grep -Fq 'Version: 2024.4.1' || die "Wrong ESPHome version; expected 2024.4.1"
+printf '%s\n' "$VERSION" | grep -Fq 'Version: 2024.4.1' || die "Wrong ESPHome version"
 
+stage "Check local secrets without printing their values"
 SECRETS="$WORKSPACE/firmware/esphome/secrets.yaml"
-[[ -s "$SECRETS" ]] || die "SECRETS_MISSING: create $SECRETS with real credentials (never share the file)"
-if ! git -C "$WORKSPACE" check-ignore -q "$SECRETS"; then
-  die "Secrets file is NOT Git-ignored: $SECRETS"
-fi
+[[ -s "$SECRETS" ]] || die "SECRETS_MISSING: create $SECRETS with real credentials"
+git -C "$WORKSPACE" check-ignore -q "$SECRETS" || die "Secrets are NOT Git-ignored"
 chmod 600 "$SECRETS"
+printf 'SECRETS_PRESENT_AND_IGNORED\n'
 
+stage "Validate configuration (private output only)"
 YAML="$WORKSPACE/$YAML_REL"
-if ! "$ESPHOME" config "$YAML" >"$LOGDIR/config.log" 2>&1; then
-  die "CONFIG_FAILED: inspect $LOGDIR/config.log locally; redact secrets before sharing excerpts"
+printf 'CONFIG_PRIVATE_LOG=%s\nCONFIG_RUNNING=output hidden to protect credentials\n' "$ESPHOME_BUILD_CONFIG_LOG"
+if ! "$ESPHOME" config "$YAML" >"$ESPHOME_BUILD_CONFIG_LOG" 2>&1; then
+  die "CONFIG_FAILED: inspect $ESPHOME_BUILD_CONFIG_LOG privately"
 fi
 printf 'CONFIG_OK\n'
 
-if ! "$ESPHOME" compile "$YAML" >"$LOGDIR/compile.log" 2>&1; then
-  die "COMPILE_FAILED: inspect $LOGDIR/compile.log locally; redact secrets before sharing excerpts"
+stage "Compile firmware (live progress + captured)"
+COMPILE_LOG="$LOGDIR/build-$ESPHOME_BUILD_RUN_ID.compile-private.log"
+if ! "$ESPHOME" compile "$YAML" 2>&1 | tee "$COMPILE_LOG"; then
+  die "COMPILE_FAILED: inspect $COMPILE_LOG"
 fi
 printf 'COMPILE_OK\n'
 
-# Restrict discovery to the expected 2024 project name; never select an older ESPHome-2026 image.
+stage "Collect UF2 candidates (no flash)"
 UF2_DIR="$WORKSPACE/firmware/esphome/.esphome/build/galaxy-lamp"
-if [[ ! -d "$UF2_DIR" ]]; then
-  die "UF2_DIR_MISSING: review $LOGDIR/compile.log for the actual build path"
-fi
-find "$UF2_DIR" -type f -name '*.uf2' -printf '%p | %s bytes\n' | tee "$LOGDIR/uf2-files.txt"
-[[ -s "$LOGDIR/uf2-files.txt" ]] || die "UF2_NOT_FOUND: compile succeeded but image location still needs verification"
-
-printf 'IMAGE_QA_PENDING: inspect UF2 target, flash ranges, hash and build logs before any flash\n'
+[[ -d "$UF2_DIR" ]] || die "UF2_DIR_MISSING: inspect compile output for path"
+UF2_LOG="$LOGDIR/build-$ESPHOME_BUILD_RUN_ID.uf2-files.txt"
+find "$UF2_DIR" -type f -name '*.uf2' -printf '%p | %s bytes\n' | tee "$UF2_LOG"
+[[ -s "$UF2_LOG" ]] || die "UF2_NOT_FOUND: inspect compile output"
+printf 'UF2_SHA256_CANDIDATES\n'
+find "$UF2_DIR" -type f -name '*.uf2' -exec sha256sum {} +
+printf 'IMAGE_QA_PENDING=UF2 structure/target/flash ranges not yet verified\n'
+printf 'NO_FLASH_PERFORMED\n'
