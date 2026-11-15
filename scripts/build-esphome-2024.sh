@@ -24,13 +24,15 @@ if [[ "${ESPHOME_BUILD_LOG_WORKER:-0}" != "1" ]]; then
   FULL_LOG="$LOGDIR/build-$RUN_ID.full-private.log"
   REVIEW_LOG="$LOGDIR/build-$RUN_ID.review.log"
 
-  printf 'BUILD_RUN_ID=%s\nLIVE_OUTPUT=enabled\n' "$RUN_ID"
-  printf 'PRIVATE_FULL_LOG=%s\n' "$FULL_LOG"
-  printf 'REVIEW_LOG_PLANNED=%s\n' "$REVIEW_LOG"
-  printf 'CONFIG_OUTPUT=private_only (resolved config can contain credentials)\n'
+  {
+    printf 'BUILD_RUN_ID=%s\nLIVE_OUTPUT=enabled\n' "$RUN_ID"
+    printf 'PRIVATE_FULL_LOG=%s\n' "$FULL_LOG"
+    printf 'REVIEW_LOG_PLANNED=%s\n' "$REVIEW_LOG"
+    printf 'CONFIG_OUTPUT=private_only (resolved config can contain credentials)\n'
+  } | tee "$FULL_LOG"
 
   set +e
-  bash "$0" "$@" 2>&1 | tee "$FULL_LOG"
+  bash "$0" "$@" 2>&1 | tee -a "$FULL_LOG"
   statuses=( "${PIPESTATUS[@]}" )
   set -e
   worker_status="${statuses[0]}"
