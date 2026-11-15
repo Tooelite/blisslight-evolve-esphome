@@ -1,18 +1,21 @@
-# Arbeitsumgebungen, Cache, Logs
+# Python environments and caches
 .venv/
 __pycache__/
 *.pyc
+
+# Local build output and diagnostics
+.build-logs/
+**/.build-logs/
 *.log
 *.bak
 *.tmp
 **/.esphome/
 **/build/
 
-# Hardware-/Firmwareabbilder und persönliche Zugangsdaten bleiben lokal.
+# Extracted images and credentials remain local
 firmware/recovery/*.bin
 firmware/recovery/*.uf2
 firmware/recovery/*.rbl
-firmware/esphome/secrets.yaml
 **/secrets.yaml
 *.key
 *.pem

@@ -3,12 +3,13 @@
 set -Eeuo pipefail
 umask 077
 
-WORKSPACE="${1:-$HOME/projekte/bliss-evolve-android}"
-VENV="${ESPHOME_2024_VENV:-$HOME/esphome-2024-env}"
-LOGDIR="$HOME/bliss-evolve-local/esphome-2024-build"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+PROJECT_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
+WORKSPACE="${1:-$PROJECT_ROOT}"
+VENV="${ESPHOME_2024_VENV:-$WORKSPACE/.venv}"
+LOGDIR="${ESPHOME_2024_LOGDIR:-$WORKSPACE/.build-logs}"
 YAML_REL="firmware/esphome/galaxy-evolve-2024-v0.1.yaml"
 EXPECTED_YAML_BLOB="e099818947b7a7e8f1ae070ffffeae62e026af25"
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 stage() { printf '\n===== %s =====\n' "$*"; }

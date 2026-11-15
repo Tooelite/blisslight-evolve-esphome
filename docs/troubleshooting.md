@@ -1,16 +1,17 @@
-# Fehlersuche – ausschließlich der dokumentierte FT232/UART-Weg
+# Troubleshooting
 
-| Symptom | Gezielte Prüfung |
+| Problem | Check |
 | --- | --- |
-| USB-UART fehlt | `lsusb -d 0403:6001`, `/dev/serial/by-id/`, `ftdi_sio`, Verbindung/USB-Kabel |
-| Zugriff verweigert / Port belegt | Benutzergruppe `dialout`, `fuser /dev/ttyUSB0`, andere Programme schließen |
-| FT232-Loopback fehlschlägt | Projektor abklemmen, TXD↔RXD brücken, Adapterlogikpegel und Loopbackskript kontrollieren |
-| BK7231N antwortet nicht | Masse, gekreuztes RX1/TX1, **3,3-V-Logik**, separate Versorgung und **kurzer CEN→GND-Reset während Verbindungsaufbau** |
-| BIN-SHA-256 oder Größe stimmen nicht | Stoppen; nur den nachweislich vollständigen, unveränderten 2-MiB-Dump verwenden |
-| `flash info` zeigt falschen Chip/Flashgröße | Stoppen; keine Schreibfreigabe |
-| Schreib-CRC schlägt wiederholt fehl | Stoppen; Versorgung, FT232/UART, Fehladresse prüfen; kein ungeprüfter kompletter Wiederholungsflash |
-| Übertragung erfolgreich, aber Gerät startet nicht | Übertragungserfolg ≠ lauffähige Firmware; Bootloader und Strom-/Startverhalten prüfen; keine Behauptung „Recovery erfolgreich“ |
-| Gerät läuft, aber Original-App/Cloud funktioniert nicht | Funktion der alten externen Tuya-/BlissLights-Dienste gesondert prüfen |
-| ESPHome `config`/`compile` fehlerhaft | Build im isolierten ESPHome-2024.4.1-Environment und lokale Secrets prüfen; keine automatischen Versionswechsel |
+| USB serial adapter not detected | `lsusb -d 0403:6001`, `/dev/serial/by-id/`, cable and FTDI driver |
+| Port is busy or access is denied | User membership in `dialout`, `fuser /dev/ttyUSB0`, close other serial applications |
+| FT232 loopback fails | Disconnect the projector, connect adapter TXD to RXD, check 3.3 V I/O and the loopback tool |
+| BK7231N does not respond | Common GND, crossed UART1 RX/TX, stable power, momentary CEN-to-GND reset during connection |
+| Raw image hash or size mismatch | Stop; use only the complete, unmodified 2 MiB dump |
+| Chip type or flash capacity differs | Stop; do not write to a mismatched target |
+| Flash sector CRC repeatedly fails | Stop; inspect wiring, supply voltage and flash address before retrying |
+| Transfer completes but device fails to boot | Transfer success does not prove a compatible bootloader or functional application |
+| Original cloud features do not work | Verify the external services independently |
+| ESPHome config or compile fails | Inspect the isolated build environment, source YAML, secrets and private phase logs |
+| Review log is unavailable | Check that all five secrets can be parsed by the redaction helper; never share the raw private logs instead |
 
-Beide Firmwarewege bleiben getrennt: [Full-BIN-Recovery](recovery.md), [ESPHome-Build](build.md), [Waveshare-Verdrahtung](wiring.md).
+See [ESPHome build](build.md), [complete raw recovery](recovery.md) and [FT232 wiring](wiring.md).

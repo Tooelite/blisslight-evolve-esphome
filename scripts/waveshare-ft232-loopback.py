@@ -31,7 +31,7 @@ def run(port: str, timeout: float) -> int:
         termios.tcsetattr(fd, termios.TCSANOW, settings)
         termios.tcflush(fd, termios.TCIOFLUSH)
 
-        print("Sende:", PAYLOAD.decode("ascii"))
+        print("Sending:", PAYLOAD.decode("ascii"))
         deadline = time.monotonic() + timeout
         sent = 0
         while sent < len(PAYLOAD) and time.monotonic() < deadline:
@@ -61,11 +61,11 @@ def run(port: str, timeout: float) -> int:
                 break
             received += chunk
 
-        print("Empfangen:", repr(received))
+        print("Received:", repr(received))
         outcome = 0 if sent == len(PAYLOAD) and received == PAYLOAD else 1
-        print("Ergebnis:", "PASS" if outcome == 0 else "FAIL")
+        print("Result:", "PASS" if outcome == 0 else "FAIL")
     except (OSError, ValueError) as exc:
-        print(f"FEHLER bei {port}: {exc}", file=sys.stderr)
+        print(f"ERROR on {port}: {exc}", file=sys.stderr)
         outcome = 2
     finally:
         if fd is not None:
@@ -73,12 +73,12 @@ def run(port: str, timeout: float) -> int:
                 try:
                     termios.tcsetattr(fd, termios.TCSANOW, old_settings)
                 except OSError as exc:
-                    print(f"WARNUNG: Port-Einstellungen nicht restauriert: {exc}", file=sys.stderr)
+                    print(f"WARNING: failed to restore port settings: {exc}", file=sys.stderr)
                     outcome = 2
             try:
                 os.close(fd)
             except OSError as exc:
-                print(f"WARNUNG: Port konnte nicht geschlossen werden: {exc}", file=sys.stderr)
+                print(f"WARNING: failed to close port: {exc}", file=sys.stderr)
                 outcome = 2
     return outcome
 
