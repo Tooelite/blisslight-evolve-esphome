@@ -1,11 +1,18 @@
+# Arbeitsumgebungen, Cache, Logs
 .venv/
 __pycache__/
 *.pyc
 *.log
 *.bak
 *.tmp
+**/.esphome/
+**/build/
 
-# Never publish recovered raw firmware or derived flash images.
+# Hardware-/Firmwareabbilder und persönliche Zugangsdaten bleiben lokal.
 firmware/recovery/*.bin
 firmware/recovery/*.uf2
 firmware/recovery/*.rbl
+firmware/esphome/secrets.yaml
+**/secrets.yaml
+*.key
+*.pem
