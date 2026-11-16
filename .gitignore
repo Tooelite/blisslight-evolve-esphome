@@ -1,0 +1,27 @@
+# Python environments and caches
+.venv/
+__pycache__/
+*.pyc
+
+# Local build output and diagnostics
+.build-logs/
+**/.build-logs/
+*.log
+*.bak
+*.tmp
+**/.esphome/
+**/build/
+
+# Extracted images and credentials remain local
+firmware/recovery/*.bin
+firmware/recovery/*.uf2
+firmware/recovery/*.rbl
+**/secrets.yaml
+*.key
+*.pem
+
+# Current private ESPHome build and credentials
+.venv-v0.3-dev/
+.build-logs-v0.3-dev/
+firmware/esphome/*.local.yaml
+firmware/esphome/build-artifacts/

@@ -1,0 +1,172 @@
+# BlissLights Evolve / Tuya CBU (BK7231N).
+# Validated device configuration: official ESPHome-dev commit
+# 602cbff184c105be128a01f8d61994407988a914 (2026.12.0-dev).
+# Uses upstream defaults: LibreTiny 1.14.0 and Beken BDK 3.0.78.
+# wifi.hidden selects a direct SSID join; it does not hide the router SSID.
+# Original hardware MAC and GPIO assignments are retained. ESPHome logging is off.
+# PUBLIC TEMPLATE: copy to the ignored .local.yaml and replace all five INSERT_* values.
+# Do not compile or flash this placeholder template. See docs/build.md.
+esphome:
+  name: galaxy-lamp
+  build_path: build/galaxy-lamp-v0.3-dev
+  friendly_name: Galaxy Evolve
+
+globals:
+  - id: dim
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
+bk72xx:
+  board: cbu
+
+logger:
+  level: NONE
+  boot_log_level: NONE
+  baud_rate: 0
+
+api:
+  encryption:
+    key: "INSERT_API_KEY_BASE64_HERE"
+
+ota:
+  - platform: esphome
+    password: "INSERT_OTA_PASSWORD_HERE"
+
+# Join directly by SSID; the router SSID remains visible.
+wifi:
+  hidden: true
+  ssid: "INSERT_WIFI_SSID_HERE"
+  password: "INSERT_WIFI_PASSWORD_HERE"
+  ap:
+    ssid: Galaxy-Evolve
+    password: "INSERT_FALLBACK_AP_PASSWORD_HERE"
+
+captive_portal:
+
+text_sensor:
+  - platform: libretiny
+    version:
+      name: LibreTiny Version
+
+light:
+  - platform: rgbw
+    id: rgbw_light
+    name: rgb Light
+    icon: mdi:star-shooting
+    red: red
+    green: green
+    blue: blue
+    white: white
+    restore_mode: RESTORE_DEFAULT_OFF
+    default_transition_length: 2s
+    effects:
+      - random:
+          name: Random
+          transition_length: 5s
+          update_interval: 5s
+      - random:
+          name: Random Slow
+          transition_length: 10s
+          update_interval: 5s
+  - platform: monochromatic
+    id: laser
+    name: Star Laser
+    icon: mdi:laser-pointer
+    output: laser_pwm
+    restore_mode: ALWAYS_OFF
+    default_transition_length: 3s
+  - platform: status_led
+    id: star_status_led
+    name: Star Status Led
+    icon: mdi:led-outline
+    entity_category: diagnostic
+    pin: GPIO0
+    internal: true
+
+fan:
+  platform: speed
+  name: Star Motor
+  icon: mdi:play-speed
+  id: motor
+  output: motor_pwm
+  restore_mode: ALWAYS_OFF
+
+output:
+  - platform: libretiny_pwm
+    id: red
+    pin: GPIO6
+    inverted: false
+  - platform: libretiny_pwm
+    id: green
+    pin: GPIO26
+    inverted: false
+  - platform: libretiny_pwm
+    id: blue
+    pin: GPIO24
+    inverted: false
+  - platform: libretiny_pwm
+    id: white
+    pin: GPIO9
+    inverted: false
+  - platform: libretiny_pwm
+    id: laser_pwm
+    pin: GPIO8
+    inverted: false
+  - platform: libretiny_pwm
+    id: motor_pwm
+    pin: GPIO7
+    min_power: 15%
+
+binary_sensor:
+  - platform: gpio
+    id: star_button
+    name: Star Button
+    pin:
+      number: GPIO14
+      mode: INPUT_PULLDOWN_16
+      inverted: false
+    on_multi_click:
+      - timing:
+          - ON for at most 1s
+          - OFF for at least 0.350s
+        then:
+          - light.toggle: rgbw_light
+      - timing:
+          - ON for at most 1s
+          - OFF for at most 0.35s
+          - ON for at most 1s
+          - OFF for at least 0.35s
+        then:
+          - light.toggle: laser
+    # Both hold branches retain the original +5% behavior.
+    on_press:
+      then:
+        - if:
+            condition:
+              lambda: |-
+                return id(dim);
+            then:
+              - delay: 0.1s
+              - while:
+                  condition:
+                    binary_sensor.is_on: star_button
+                  then:
+                    - light.dim_relative:
+                        id: rgbw_light
+                        relative_brightness: 5%
+                    - delay: 0.1s
+              - lambda: |-
+                  id(dim) = (false);
+            else:
+              - delay: 0.1s
+              - while:
+                  condition:
+                    binary_sensor.is_on: star_button
+                  then:
+                    - light.dim_relative:
+                        id: rgbw_light
+                        relative_brightness: 5%
+                    - delay: 0.1s
+              - lambda: |-
+                  id(dim) = (true);
