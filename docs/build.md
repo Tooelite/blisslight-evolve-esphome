@@ -22,6 +22,30 @@ Verify the installed source commit (expected: `602cbff184c105be128a01f8d61994407
 .venv-v0.3-dev/bin/python -c 'import importlib.metadata as m, json; print(json.loads(m.distribution("esphome").read_text("direct_url.json"))["vcs_info"]["commit_id"])'
 ```
 
+## Install ltchiptool for image inspection and serial flashing
+
+ESPHome compiles the firmware. **ltchiptool** inspects the resulting image and writes it over the USB-UART adapter; it is not another build system. The working installation used **ltchiptool 4.15.0**. Its version is independent of the LibreTiny framework version 1.14.0.
+
+For a fresh Linux/Debian setup, install the CLI in a separate virtual environment from the repository root. The `.venv/` directory is already Git-ignored:
+
+```bash
+python3 -m venv .venv/ltchiptool
+.venv/ltchiptool/bin/python -m pip install 'ltchiptool==4.15.0'
+.venv/ltchiptool/bin/ltchiptool --version
+```
+
+Expect `ltchiptool v4.15.0`. This follows the [official CLI installation](https://docs.libretiny.eu/docs/flashing/tools/ltchiptool/#installation) with a fixed version and an isolated Python environment. GUI extras are unnecessary for these terminal instructions. If Python reports that `venv` is unavailable, install the Debian venv package matching your Python interpreter before continuing; do not install packages into the system Python with `sudo pip`.
+
+Make this executable available to the `ltchiptool` commands in this guide, [flash.md](flash.md) and [recovery.md](recovery.md):
+
+```bash
+export PATH="$PWD/.venv/ltchiptool/bin:$PATH"
+command -v ltchiptool
+ltchiptool --version
+```
+
+Run this from the repository root in each new terminal, or use the executable's full path instead. If you already have a working installation, check its path and version and reuse it; no reinstall is needed. The version pin identifies the tested tool release, not a lock of every transitive Python dependency.
+
 ## Create the private configuration
 
 ```bash
@@ -68,11 +92,20 @@ Build directory: `firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/`. Canoni
 firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
 ```
 
-Confirm that its generated `platformio.ini` selects board `cbu`, LibreTiny `v1.14.0`, and `custom_versions.beken-bdk = 3.0.78`. Check the UF2 target with the official tool and record its hash:
+## Inspect and record the image before flashing
+
+Confirm that its generated `platformio.ini` selects board `cbu`, LibreTiny `v1.14.0`, and `custom_versions.beken-bdk = 3.0.78`. With ltchiptool installed as above, inspect the exact UF2 you intend to keep and flash. These commands read local files and do not connect to the projector:
 
 ```bash
-ltchiptool uf2 info firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
-sha256sum firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
+UF2=firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
+ltchiptool flash file "$UF2"
+ltchiptool uf2 info "$UF2"
+stat -c '%s bytes' "$UF2"
+sha256sum "$UF2"
 ```
 
-These commands assume an existing `ltchiptool` installation on PATH; otherwise use its actual absolute executable path. Back up the exact image and its hash before [flashing](flash.md). Binaries contain credentials and must not be published. The process is pinned and documented; bit-identical rebuilds are not established.
+`flash file` detects the file format and intended target; despite its name, it does not write flash. `uf2 info` shows the UF2 metadata. Require a recognized UF2 for **BK7231N / CBU**, with LibreTiny **1.14.0** in its build metadata. Stop on a different target, an unrecognized file or conflicting metadata; do not compensate by guessing raw flash addresses. Metadata inspection alone does not prove that the device will boot or connect.
+
+Record the image path, byte size, SHA-256, ESPHome source commit, LibreTiny version and ltchiptool version with your private backup. A new build can have a different hash because it embeds credentials and build information; do not substitute a hash from someone else's build.
+
+Back up the exact image and its hash before [flashing](flash.md). That guide covers the verified serial port, original power supply, disconnected laser, wiring, CEN handshake and the write command. Building or inspecting an image does not flash the device. Binaries contain credentials and must not be published. The process is pinned and documented; bit-identical rebuilds are not established.
