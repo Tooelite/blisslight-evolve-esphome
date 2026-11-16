@@ -64,13 +64,7 @@ ls -l /dev/ttyUSB*
 fuser /dev/ttyUSB0 || true
 ```
 
-Bridge the adapter's **TXD to RXD**, then run from the repository root:
-
-```bash
-python3 scripts/waveshare-ft232-loopback.py --port /dev/ttyUSB0 --timeout 3
-```
-
-Require `Result: PASS`. **Remove the bridge** before connecting the projector.
+Use the actual adapter port in the commands below. USB detection confirms the adapter is present; it does not prove UART wiring or communication with the projector. Keep TXD and RXD crossed to the PCB as illustrated, without an adapter TXD–RXD bridge.
 
 ## Image preflight (no serial connection)
 

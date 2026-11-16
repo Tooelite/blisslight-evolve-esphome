@@ -29,10 +29,10 @@ tar -xOzf firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz \
   'readResult_BK7231N_QIO_bliss_2023-14-6--12-56-58.bin' \
   > firmware/recovery/recovery-image.bin
 
-python3 scripts/check-image.py firmware/recovery/recovery-image.bin
+echo '07a76fa01817d4924cebe72b3ebfe789a86bdb3c94418d7570baaf10e1b58da0  firmware/recovery/recovery-image.bin' | sha256sum -c -
 ```
 
-Only continue if the image checker reports `PASS`. The extracted binary is Git-ignored.
+Only continue if both SHA-256 checks succeed and report `OK`. The raw-image hash identifies the exact documented 2 MiB reference file. Stop on any extraction or checksum error. The extracted binary is Git-ignored.
 
 ## 2. Identify the target
 

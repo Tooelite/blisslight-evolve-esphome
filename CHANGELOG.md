@@ -8,3 +8,4 @@
 - Confirmed private build validation, compilation, verified UART transfer, home Wi-Fi connection and encrypted API device-info response identifying this build.
 - Publish credential placeholders only; document private local copies and official build/flash commands.
 - Retain PCB and adapter illustrations and the unchanged original recovery archive.
+- Use official ESPHome/ltchiptool commands and standard checksum tools without repository-specific build, diagnostic or Git-hook scripts.
