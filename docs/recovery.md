@@ -16,7 +16,7 @@ This procedure restores a **complete, unmodified 2 MiB raw flash dump** from ano
 
 The dump contains a CRC-valid bootloader RBL header at `0x10F9A`, an application scan from `0x11000`, and Tuya storage from `0x1EE000`. The analyzer's value **`0xDEAC0` is a CRC-stripped application payload length, not a flash-write length**. Do not crop the raw file, shift its addresses or flash the extracted application data in place of the complete BIN.
 
-Thanks to **[Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html)** for providing the firmware dump. Check redistribution rights and any embedded device-specific data before publishing the archive.
+Thanks to **[Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html)** for providing the firmware dump.
 
 ## 1. Extract and verify
 
