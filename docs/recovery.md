@@ -1,6 +1,6 @@
 # Restore the complete original firmware
 
-This procedure restores a **complete, unmodified 2 MiB raw flash dump** from another BlissLights Evolve (Tuya CBU / BK7231N). This file is **not** a UF2 application image.
+This procedure restores a **complete, unmodified 2 MiB raw flash dump** from another BlissLights Evolve (Tuya CBU / BK7231N). This file is **not** a UF2 application image. Restoration of this reference dump has not been validated on the current device; the working ESPHome installation does not require this procedure.
 
 **Warning:** Disconnect the laser module electrically before powering the opened device or flashing, as described in [flash safety](flash.md). A complete restore replaces the bootloader, firmware, device identity, stored settings and potentially calibration data. The reference image comes from another device and may not work on every hardware revision. Verify the target and source before writing.
 
@@ -26,7 +26,7 @@ From the repository root:
 echo '2665124ef072fe579b4f38f85e39352cd08a35a0b71167b4706e0e39b40b6d37  firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz' | sha256sum -c -
 
 tar -xOzf firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz \
-  --wildcards '*readResult_BK7231N_QIO_bliss_2023-14-6--12-56-58.bin' \
+  'readResult_BK7231N_QIO_bliss_2023-14-6--12-56-58.bin' \
   > firmware/recovery/recovery-image.bin
 
 python3 scripts/check-image.py firmware/recovery/recovery-image.bin
@@ -71,6 +71,6 @@ The CRC checks and retries are **not** equivalent to a complete independent flas
 
 ## 4. Verify functionality
 
-Restart the device and check serial boot, RGBW, laser, motor, local controls, Wi-Fi and operation after a power cycle. Original cloud functionality may require services that are unavailable.
+Keep the laser disconnected during open-enclosure checks of serial boot, RGBW, motor, local controls and Wi-Fi. Evaluate the laser only with the enclosure closed and the electrical precautions in the flash guide observed. Check operation after a power cycle separately. Original cloud functionality may require services that are unavailable.
 
 For an ESPHome UF2, use [the build instructions](build.md). **Never apply raw full-flash offsets to a UF2 image.**

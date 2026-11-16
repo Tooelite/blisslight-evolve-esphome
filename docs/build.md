@@ -4,22 +4,33 @@ Source: [`galaxy-evolve-v0.3-dev.yaml`](../firmware/esphome/galaxy-evolve-v0.3-d
 
 ## Install the pinned official CLI
 
-Requirements: Linux, Python **3.12–3.15** with `venv`/`pip`, Internet access and enough space for the toolchain. From the repository root:
+Requirements: Linux, Git, Python **3.12–3.15** with `venv`/`pip`, Internet access and enough space for the toolchain. From the repository root:
 
 ```bash
+python3 --version
+git --version
 python3 -m venv .venv-v0.3-dev
 .venv-v0.3-dev/bin/python -m pip install 'git+https://github.com/esphome/esphome.git@602cbff184c105be128a01f8d61994407988a914'
 .venv-v0.3-dev/bin/esphome version
 ```
 
-The version should be `2026.12.0-dev`. The fixed Git commit identifies the exact source; the version string alone does not. This uses ESPHome's own build process and leaves any desktop installation separate.
+The hardware-confirmed build used Python 3.14.7; the supported interpreter range above comes from the pinned package metadata. The version should be `2026.12.0-dev`. The fixed Git commit identifies the exact source; the version string alone does not. This uses ESPHome's own build process and leaves any desktop installation separate.
+
+Verify the installed source commit (expected: `602cbff184c105be128a01f8d61994407988a914`):
+
+```bash
+.venv-v0.3-dev/bin/python -c 'import importlib.metadata as m, json; print(json.loads(m.distribution("esphome").read_text("direct_url.json"))["vcs_info"]["commit_id"])'
+```
 
 ## Create the private configuration
 
 ```bash
-cp firmware/esphome/galaxy-evolve-v0.3-dev.yaml firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
+umask 077
+cp -n -- firmware/esphome/galaxy-evolve-v0.3-dev.yaml firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
 chmod 600 firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
 ```
+
+The copy command preserves an existing local file. If one already exists, check its non-secret settings against the current template without overwriting its credentials.
 
 Edit **only the local copy** and replace all five `INSERT_*` values:
 
@@ -37,10 +48,10 @@ Verify that the private file is ignored and untracked:
 
 ```bash
 git check-ignore firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
-git ls-files --error-unmatch firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
+git ls-files -- firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
 ```
 
-The first command must report the path; the second must fail because the file is not tracked. Do not build or flash with placeholder credentials. Do not print, commit or share the resolved configuration.
+The first command must report the path; the second must produce no output because the file is not tracked. Do not build or flash with placeholder credentials. Do not print, commit or share the resolved configuration.
 
 ## Validate and compile
 

@@ -21,13 +21,15 @@ logger:
   level: DEBUG
 ```
 
-UART1 is available on the illustrated PCB TX/RX pads. Use the installed official CLI:
+First validate and compile this private diagnostic configuration using [the build guide](build.md). It must then be flashed after a separate explicit device-flash decision. Editing the YAML or running `esphome logs` cannot enable logging in the already installed No-Log firmware.
+
+After that diagnostic firmware is installed, UART1 is available on the illustrated PCB TX/RX pads. Use the installed official CLI:
 
 ```bash
 .venv-v0.3-dev/bin/esphome logs firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml --device /dev/ttyUSB0
 ```
 
-Use the actual adapter port. Logs can expose credentials; keep them private. A temporary diagnostic logger change requires rebuilding and a separate device-flash decision. Return to the supplied disabled-logging configuration after the diagnostic result is recorded.
+Use the actual adapter port. Logs can expose credentials; keep them private. Return to the supplied disabled-logging configuration after the diagnostic result is recorded.
 
 ## Verification boundaries
 

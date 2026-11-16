@@ -81,9 +81,9 @@ test -s "$UF2" && sha256sum "$UF2"
 
 Verify UF2 metadata and flash address ranges for BK7231N before writing. An ESPHome UF2 is not a raw flash dump.
 
-## Read-only chip identification
+## Chip identification (requires download mode)
 
-Connect the crossed UART1 lines and GND, then power the projector from its normal supply.
+Disconnect the laser before powering the opened device. Connect the crossed UART1 lines and GND, then power the projector from its original supply. This identification does not write flash, but entering download mode interrupts the running firmware.
 
 ```bash
 ltchiptool flash info bk7231n -d /dev/ttyUSB0

@@ -42,6 +42,11 @@ Use the [current build](build.md), record its SHA-256 and check its UF2 metadata
 ```bash
 ltchiptool uf2 info firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
 sha256sum firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
+```
+
+After reviewing the metadata, image hash and wiring, the write command is:
+
+```bash
 ltchiptool flash write -c -d /dev/ttyUSB0 firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
 ```
 

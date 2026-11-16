@@ -30,6 +30,12 @@ A private build of this configuration passed validation and compilation, was UAR
 
 The checked-in YAML contains **placeholders only**. Put credentials in the Git-ignored `.local.yaml` described in the build guide. Firmware binaries also contain credentials and must remain private.
 
+## Connect with Home Assistant
+
+Find the projector's current IP address in the router. In Home Assistant, open **Settings → Devices & services → Add integration → ESPHome**, enter that IP and port **6053**, and supply the encryption key from your private YAML (`api.encryption.key`). This is a different value from the Wi-Fi or OTA password. See the [official integration guide](https://www.home-assistant.io/integrations/esphome/).
+
+The supplied YAML has no `web_server`; the normal home-network IP does not provide a browser control page. The fallback access-point captive portal serves network provisioning.
+
 ## Documentation
 
 - [Build the current firmware](docs/build.md)
