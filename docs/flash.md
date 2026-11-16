@@ -2,6 +2,38 @@
 
 Target: BlissLights Evolve SKY-EVOLVE-B-RCWB (Tuya CBU / BK7231N). Adapter: Waveshare FT232 USB UART Board (Type A, SKU 6170), 3.3 V TTL.
 
+## Before connecting the projector
+
+Run terminal commands from the repository root. Install **ltchiptool 4.15.0** using [the build guide](build.md#install-ltchiptool-for-image-inspection-and-serial-flashing), or use your verified existing installation:
+
+```bash
+command -v ltchiptool
+ltchiptool --version
+ltchiptool flash write --help
+```
+
+Keep the checked UF2, its recorded SHA-256 and the matching private configuration backed up. Do not flash the public placeholder configuration. If preserving the previous device installation matters, keep a verified backup of that device before overwriting it. The [community recovery reference](recovery.md) comes from another projector and is not a backup of your device identity or settings.
+
+Plug in the USB adapter with the projector disconnected and identify its port:
+
+```bash
+ls -l /dev/serial/by-id/
+ls -l /dev/ttyUSB*
+```
+
+Select the entry belonging to your adapter, checking which entry disappears and reappears when unplugging/replugging the adapter if necessary. Prefer its stable `/dev/serial/by-id/…` path when available. USB detection alone does not verify UART voltage or PCB wiring.
+
+Set `PORT` to that actual path. The example below is only valid if your adapter was identified as `/dev/ttyUSB0`:
+
+```bash
+PORT=/dev/ttyUSB0
+ls -l "$PORT"
+id
+fuser "$PORT"
+```
+
+Close ESPHome log viewers, serial terminals and any other process using that port before flashing. `fuser` normally exits with status 1 when it finds no user; if the command is unavailable, install Debian's `psmisc` package or check port use with your existing system tools. For `Permission denied`, inspect the serial device's group and your group membership. Debian commonly uses `dialout`; obtain the appropriate group access and log in again before retrying. Do not solve this by running the whole toolchain as root or making the port writable to everyone.
+
 ## Power supply - required
 
 **Use the projector's original power adapter for the PCB.** The Waveshare FT232 USB UART Board (Type A, SKU 6170) cannot provide sufficient current to power the projector PCB. Its 3.3 V jumper configures UART logic levels only. **Do not connect FT232 VCCIO, 3V3 or 5V to the PCB power pins.** Connect only TXD, RXD and a common GND, plus the momentary GND-to-CEN reset bridge. Disconnect power before changing wiring.
@@ -37,25 +69,50 @@ Use the projector's normal power supply. Never power it from FT232 VCCIO. Verify
 3. **Flash:** Start `ltchiptool`; when it waits for the chip, briefly bridge **10B to 12B** and remove the bridge. Do not interrupt the transfer.
 4. **Verify:** The UF2 writer boots the application after completion. Leave the laser disconnected and verify the router/API status. A deliberate power-cycle test is a separate verification step.
 
-Use the [current build](build.md), record its SHA-256 and check its UF2 metadata before writing. Commands assume an existing `ltchiptool` installation on PATH; otherwise use its actual executable path. Replace `/dev/ttyUSB0` with the verified adapter port.
+### Check the exact image
+
+Use the [current build](build.md). In the same terminal where you set `PORT`, select the exact UF2:
 
 ```bash
-ltchiptool uf2 info firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
-sha256sum firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
+UF2=firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
+test -s "$UF2"
+ltchiptool flash file "$UF2"
+ltchiptool uf2 info "$UF2"
+sha256sum "$UF2"
 ```
 
-After reviewing the metadata, image hash and wiring, the write command is:
+Stop if the file is missing or any check fails. Require a recognized UF2, family **BK7231N**, board **cbu** and LibreTiny **1.14.0** metadata. Compare the SHA-256 against the value recorded for this exact private build or backup; merely printing a hash does not establish that it is the intended image. Do not rebuild or replace the file between this check and writing. Both ltchiptool commands above inspect the file without contacting the device.
+
+### Write and verify the transfer
+
+After checking the image and completing the wiring/power steps above, explicitly decide to flash. Then run:
 
 ```bash
-ltchiptool flash write -c -d /dev/ttyUSB0 firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
+ltchiptool flash write -c -d "$PORT" -t 60 "$UF2"
 ```
 
-The last command writes device flash. Run it only after explicitly deciding to flash the checked image. `-c` enables data verification. The official UF2 writer boots the firmware after writing; no separate erase command or raw start address is needed. If linking waits, briefly bridge **10B (GND)** to **12B (CEN)** and release it.
+When the tool waits to link, briefly bridge **10B (GND)** to **12B (CEN)** and release it. CEN must not remain grounded. Do not reset, remove power or disconnect the adapter during writing or verification.
+
+`-d` selects the checked adapter, `-c` enables the tool's hash/CRC checks and `-t 60` allows 60 seconds for the initial chip connection. This timeout is unrelated to Wi-Fi association after boot. Baud rates are selected by the tool; no manual rate override is required for this procedure. UF2 supplies the target layout: do not add raw offsets, a transfer length or a separate erase command.
+
+Require completion with **exit status 0 and no reported write/verification error**. Preserve the image hash and transfer result privately. These checks are not a complete independent flash readback and do not establish boot or Wi-Fi success. The official UF2 writer starts the application after writing; a separate manual reset is normally unnecessary.
 
 ## Verify after first boot
 
-With the laser still disconnected, check the serial boot messages if available, configured Wi-Fi, ESPHome API, button, non-laser outputs and operation after a power cycle. The supplied final configuration disables normal ESPHome logs; confirm the running build through the encrypted API instead. A successful write alone does not establish that all firmware functions work. Do not energize an exposed laser or reconnect its cable during open-enclosure tests.
+Keep the laser disconnected throughout open-enclosure checks.
 
-If `ltchiptool` cannot connect, first check that the original power adapter is on, UART TX/RX are crossed, a common GND is present, and the CEN bridge was removed after the short reset. If the chip identifies as something other than BK7231N, or the tool reports repeated CRC errors or unexpected flash offsets, **stop** rather than retrying a write with guessed settings. Never use full-raw-flash offsets for an ESPHome UF2.
+1. Check that the router reports a **currently connected** device and its current IP, not just a saved entry. Keep the configured 2.4 GHz network available. No fixed boot-to-connection time has been measured for this configuration; a six-minute wait is not an established normal requirement.
+2. Connect through the encrypted ESPHome API, for example using [Home Assistant as described in the README](../README.md#connect-with-home-assistant). Use the API key from the matching private YAML. Where available, compare reported firmware version/build time with the intended build to distinguish it from an old router entry. The firmware does not provide a normal browser control page.
+3. Test RGBW, motor and button separately. A deliberate power-cycle test, repeated starts, OTA and longer observation are separate checks, not implied by a successful transfer. Reconnect the laser only with power disconnected and for operation with the enclosure closed.
+
+The supplied configuration disables normal ESPHome serial/API logging. An empty serial terminal therefore does not prove that boot failed. BootROM/SDK output is separate and not guaranteed silent. Enabling ESPHome logs requires a separately built and flashed diagnostic configuration; see [operational checks](troubleshooting.md#logging).
+
+## If a step fails
+
+- **Port missing or busy:** Recheck the adapter path and close its other users. Resolve permissions before retrying. Do not change PCB wiring while either power source is connected.
+- **No chip connection:** Check original power, crossed TX/RX, common GND and the brief CEN bridge after the tool starts waiting. After a connection timeout, start the command again and repeat that handshake; do not reset during an active transfer.
+- **Unexpected chip/layout or repeated CRC errors:** Stop. Recheck image, wiring, voltage and power before another write. Do not disable verification or guess flash offsets.
+- **Interrupted or failed write:** Firmware completeness is unknown. Keep the checked image and private error output; correct the identified connection/power issue before retrying the same image. An interrupted write is not a reason to erase the whole flash or substitute a foreign raw dump.
+- **Transfer succeeds but no WLAN/API:** Investigate the running build and configured network separately using [operational checks](troubleshooting.md). Do not infer a successful application test from the flash result, or change MAC/GPIO/framework settings without evidence.
 
 References: [LibreTiny CBU](https://docs.libretiny.eu/boards/cbu/), [Beken serial flashing](https://docs.libretiny.eu/docs/platform/beken-72xx/), [ltchiptool](https://docs.libretiny.eu/docs/flashing/tools/ltchiptool/).
