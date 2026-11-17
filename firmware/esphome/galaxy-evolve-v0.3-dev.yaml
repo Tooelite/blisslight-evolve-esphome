@@ -1,5 +1,5 @@
 # BlissLights Evolve / Tuya CBU (BK7231N).
-# Validated device configuration: official ESPHome-dev commit
+# Configuration for official ESPHome-dev commit
 # 602cbff184c105be128a01f8d61994407988a914 (2026.12.0-dev).
 # Uses upstream defaults: LibreTiny 1.14.0 and Beken BDK 3.0.78.
 # wifi.hidden selects a direct SSID join; it does not hide the router SSID.
