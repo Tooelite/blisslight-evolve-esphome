@@ -1,6 +1,6 @@
 # Restore the complete original firmware
 
-This procedure restores a **complete, unmodified 2 MiB raw flash dump** from another BlissLights Evolve (Tuya CBU / BK7231N). This file is **not** a UF2 application image. Restoration of this reference dump has not been validated on the current device; the working ESPHome installation does not require this procedure.
+This procedure restores a **complete, unmodified 2 MiB raw flash dump** from another BlissLights Evolve (Tuya CBU / BK7231N). This file is **not** a UF2 application image. Restoration of this reference dump is not guaranteed across hardware revisions; this procedure is only for recovering the original firmware.
 
 **Warning:** Disconnect the laser module electrically before powering the opened device or flashing, as described in [flash safety](flash.md). A complete restore replaces the bootloader, firmware, device identity, stored settings and potentially calibration data. The reference image comes from another device and may not work on every hardware revision. Verify the target and source before writing.
 
