@@ -16,4 +16,4 @@ Thanks to **[Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html)** fo
 
 **Caution:** A complete raw restore overwrites the bootloader and all storage, including device-specific settings. The CRC-stripped application size `0xDEAC0` is **not** the raw-image flash length `0x200000`.
 
-See [the recovery procedure](../../docs/recovery.md). Check firmware redistribution rights and embedded device-specific data before making the archive public.
+See [the recovery procedure](../../docs/recovery.md).
