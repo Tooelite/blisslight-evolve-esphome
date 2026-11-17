@@ -33,4 +33,4 @@ Use the actual adapter port. Logs can expose credentials; keep them private. Ret
 
 ## Verification boundaries
 
-Wi-Fi and an encrypted API device-info request were confirmed with a private build of the supplied configuration. Check repeated starts, long-term stability, OTA and projector functions on the actual device before claiming those functions verified. Keep the laser disconnected while the enclosure is open; do not reconnect it to diagnose Wi-Fi.
+Verify Wi-Fi, encrypted API device-info, repeated starts, long-term stability, OTA and projector functions on the target device before treating them as validated. Keep the laser disconnected while the enclosure is open; do not reconnect it to diagnose Wi-Fi.
