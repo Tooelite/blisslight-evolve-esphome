@@ -36,7 +36,7 @@ Header pin order with USB-A at the bottom: **CTS#, RTS#, RXD, TXD, GND, VCCIO** 
 
 <img src="../images/evolve-pcb-pad-detail.png" alt="Close-up of PCB 3V3, TX, RX, GND and Reset pads" width="560">
 
-The PCB solder-side pads connect to the breadboard as follows:
+The illustrated example connects the PCB solder-side pads to the breadboard as follows; contact positions and wire colors apply only to this layout:
 
 | PCB pad | Breadboard (PCB side) | Breadboard (FT232 side) | FT232 |
 | --- | --- | --- | --- |
@@ -52,7 +52,7 @@ The A-E contacts within each numbered row are internally connected. Briefly brid
 
 <img src="../images/waveshare-breadboard-reset.png" alt="Breadboard UART and CEN reset wiring" width="680">
 
-Breadboard rows A-E are internally connected. **10B is GND** and **12A carries CEN**. Briefly bridge **10B to 12B** to reset the BK7231N, then remove the bridge.
+In the illustrated breadboard layout, rows A-E are internally connected. **10B is GND** and **12A carries CEN**. Briefly bridge **10B to 12B** to reset the BK7231N, then remove the bridge.
 
 
 ## Adapter check (projector disconnected)
