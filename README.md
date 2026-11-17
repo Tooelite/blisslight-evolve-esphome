@@ -26,8 +26,6 @@ logger:
   baud_rate: 0
 ```
 
-A private build of this configuration passed validation and compilation, was UART-flashed with data verification, connected to the home Wi-Fi, and answered an encrypted ESPHome API device-info request identifying the new build on **16 November 2026**. Connection time from boot, repeated cold starts, long-term stability, OTA and all projector functions have not been separately validated. CPU/power savings from disabling logging were not measured.
-
 The checked-in YAML contains **placeholders only**. Put credentials in the Git-ignored `.local.yaml` described in the build guide. Firmware binaries also contain credentials and must remain private.
 
 ## Connect with Home Assistant
