@@ -14,7 +14,7 @@ python3 -m venv .venv-v0.3-dev
 .venv-v0.3-dev/bin/esphome version
 ```
 
-The hardware-confirmed build used Python 3.14.7; the supported interpreter range above comes from the pinned package metadata. The version should be `2026.12.0-dev`. The fixed Git commit identifies the exact source; the version string alone does not. This uses ESPHome's own build process and leaves any desktop installation separate.
+The supported interpreter range above comes from the pinned package metadata. The version should be `2026.12.0-dev`. The fixed Git commit identifies the exact source; the version string alone does not. This uses ESPHome's own build process and leaves any desktop installation separate.
 
 Verify the installed source commit (expected: `602cbff184c105be128a01f8d61994407988a914`):
 
@@ -24,7 +24,7 @@ Verify the installed source commit (expected: `602cbff184c105be128a01f8d61994407
 
 ## Install ltchiptool for image inspection and serial flashing
 
-ESPHome compiles the firmware. **ltchiptool** inspects the resulting image and writes it over the USB-UART adapter; it is not another build system. The working installation used **ltchiptool 4.15.0**. Its version is independent of the LibreTiny framework version 1.14.0.
+ESPHome compiles the firmware. **ltchiptool** inspects the resulting image and writes it over the USB-UART adapter; it is not another build system. This guide uses **ltchiptool 4.15.0**. Its version is independent of the LibreTiny framework version 1.14.0.
 
 For a fresh Linux/Debian setup, install the CLI in a separate virtual environment from the repository root. The `.venv/` directory is already Git-ignored:
 
@@ -44,7 +44,7 @@ command -v ltchiptool
 ltchiptool --version
 ```
 
-Run this from the repository root in each new terminal, or use the executable's full path instead. If you already have a working installation, check its path and version and reuse it; no reinstall is needed. The version pin identifies the tested tool release, not a lock of every transitive Python dependency.
+Run this from the repository root in each new terminal, or use the executable's full path instead. If you already have a working installation, check its path and version and reuse it; no reinstall is needed. The version pin fixes the CLI release, not every transitive Python dependency.
 
 ## Create the private configuration
 
@@ -108,4 +108,4 @@ sha256sum "$UF2"
 
 Record the image path, byte size, SHA-256, ESPHome source commit, LibreTiny version and ltchiptool version with your private backup. A new build can have a different hash because it embeds credentials and build information; do not substitute a hash from someone else's build.
 
-Back up the exact image and its hash before [flashing](flash.md). That guide covers the verified serial port, original power supply, disconnected laser, wiring, CEN handshake and the write command. Building or inspecting an image does not flash the device. Binaries contain credentials and must not be published. The process is pinned and documented; bit-identical rebuilds are not established.
+Back up the exact image and its hash before [flashing](flash.md). That guide covers serial-port identification, original power supply, disconnected laser, wiring, CEN handshake and the write command. Building or inspecting an image does not flash the device. Binaries contain credentials and must not be published. The process is pinned and documented; bit-identical rebuilds are not established.
