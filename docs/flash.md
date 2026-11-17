@@ -4,7 +4,7 @@ Target: BlissLights Evolve SKY-EVOLVE-B-RCWB (Tuya CBU / BK7231N). Adapter: Wave
 
 ## Before connecting the projector
 
-Run terminal commands from the repository root. Install **ltchiptool 4.15.0** using [the build guide](build.md#install-ltchiptool-for-image-inspection-and-serial-flashing), or use your verified existing installation:
+Run terminal commands from the repository root. Install **ltchiptool 4.15.0** using [the build guide](build.md#install-ltchiptool-for-image-inspection-and-serial-flashing), or use an existing installation whose version and command syntax you have checked:
 
 ```bash
 command -v ltchiptool
@@ -40,7 +40,7 @@ Close ESPHome log viewers, serial terminals and any other process using that por
 
 ## Disconnect the laser
 
-The manufacturer's rear label identifies this unit as a **Class 2 laser product** (IEC 60825-1 Ed. 3, 2014; diode laser, maximum output <1 mW).
+The manufacturer's rear label identifies the projector as a **Class 2 laser product** (IEC 60825-1 Ed. 3, 2014; diode laser, maximum output <1 mW).
 
 **Completely disconnect the laser module from the main PCB before powering the opened device or flashing firmware.** Remove power before unplugging it, insulate the disconnected connector, and keep it unplugged during flashing and initial tests. Software-off and motor disconnection do not provide equivalent electrical isolation. Identify the actual laser connection on the hardware; do not infer it from wire colors.
 
@@ -101,7 +101,7 @@ Require completion with **exit status 0 and no reported write/verification error
 
 Keep the laser disconnected throughout open-enclosure checks.
 
-1. Check that the router reports a **currently connected** device and its current IP, not just a saved entry. Keep the configured 2.4 GHz network available. No fixed boot-to-connection time has been measured for this configuration; a six-minute wait is not an established normal requirement.
+1. Check that the router reports a **currently connected** device and its current IP, not just a saved entry. Keep the configured 2.4 GHz network available. Do not assume a fixed boot-to-connection time; confirm connectivity using the router and encrypted API.
 2. Connect through the encrypted ESPHome API, for example using [Home Assistant as described in the README](../README.md#connect-with-home-assistant). Use the API key from the matching private YAML. Where available, compare reported firmware version/build time with the intended build to distinguish it from an old router entry. The firmware does not provide a normal browser control page.
 3. Test RGBW, motor and button separately. A deliberate power-cycle test, repeated starts, OTA and longer observation are separate checks, not implied by a successful transfer. Reconnect the laser only with power disconnected and for operation with the enclosure closed.
 
