@@ -6,44 +6,7 @@ For the **BlissLights Evolve SKY-EVOLVE-B-RCWB** with the **Tuya CBU / BK7231N**
 
 ## Update over Wi-Fi (OTA)
 
-Choose the path that matches what is already installed and what you want to change.
-
-### 1. Install ESPHome from the BlissLights factory firmware
-
-Prepare a private YAML for your projector and build and inspect the `cbu` image using the [build guide](build.md). Install it over USB-UART following the [serial instructions below](#flashing-adapter-used), including the CEN reset for the first flash. Once ESPHome with native OTA is installed and reachable over Wi-Fi, subsequent updates can use the network.
-
-### 2. Update ESPHome or LibreTiny on a projector already running ESPHome
-
-Choose the new toolchain, keep `bk72xx.board: cbu` and carry over the projector's private Wi-Fi and OTA settings. Check which LibreTiny and Beken BDK versions the chosen ESPHome release selects. Use the existing [build and image checks](build.md#validate-and-compile), then follow the [shared OTA upload steps](#upload-and-verify).
-
-### 3. Change only the YAML settings on a projector already running ESPHome
-
-For example, to change a button automation, edit the private YAML and keep the same ESPHome and framework versions if you want to change only that behavior. The YAML is compiled into the firmware, so [validate and rebuild the image](build.md#validate-and-compile), then use the [same OTA upload steps](#upload-and-verify).
-
-### What travels over Wi-Fi
-
-ESPHome reads the YAML and builds the image on your computer. Only the firmware image is transferred. For the reference **ESPHome `2026.12.0-dev` / LibreTiny `1.14.0`** build, the CLI starts from `firmware.uf2` and automatically selects the parts of that package needed for OTA. The running firmware checks and stages the update in the CBU's OTA partition. The bootloader installs it after restart. [Reference OTA uploader](https://github.com/esphome/esphome/blob/602cbff184c105be128a01f8d61994407988a914/esphome/components/libretiny/__init__.py#L704-L720) · [LibreTiny CBU flash layout](https://docs.libretiny.eu/boards/cbu/#flash-memory-map)
-
-### Before uploading
-
-- Confirm the enclosed projector is already running ESPHome with the `esphome` platform under `ota` in its installed configuration. Use its current local IP address, verified in the router or via the ESPHome integration. Keep the projector on its original power supply and on stable **2.4 GHz Wi-Fi**. Native OTA connects to **TCP 8892** by default on the BK7231N, separately from the control API. The CLI works directly over the local network. [Project YAML](../firmware/esphome/galaxy-evolve-v0.3-dev.yaml#L21-L44) · [ESPHome OTA configuration](https://esphome.io/components/ota/esphome/)
-- For the first OTA test, keep the board, Wi-Fi settings and credentials from the installed build. Start from the private YAML that matches the installed build, and keep a copy of the previous working image. The upload authenticates against the firmware **currently running**. The template sets an OTA password separately from the API key. If an older or customized build uses different OTA credentials or options, check that build's configuration before attempting the update. [Private configuration and build](build.md#create-the-private-configuration) · [ESPHome OTA credential changes](https://esphome.io/components/ota/esphome/#updating-the-password)
-
-### Upload and verify
-
-1. After the build and image checks, run the following from the repository root. Replace `192.0.2.10` with the projector's actual IP address. The command shows the reference environment. If you chose another ESPHome version, use the executable from that build environment.
-
-   ```bash
-   CONFIG=firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
-   PROJECTOR_IP=192.0.2.10
-   .venv-v0.3-dev/bin/esphome upload "$CONFIG" --device "$PROJECTOR_IP"
-   ```
-
-   `upload` sends the existing build. The alternative, `esphome run "$CONFIG" --device "$PROJECTOR_IP" --no-logs`, compiles and uploads in one step. Use `upload` to send the image you inspected separately. [ESPHome CLI reference](https://esphome.io/guides/cli/)
-2. Keep power connected through the transfer and restart. After a successful upload, confirm that the projector rejoins Wi-Fi and its encrypted API responds. Compare the reported firmware version and build time when available, then test the behavior the update was meant to change. [Check the running firmware](troubleshooting.md#confirm-the-running-firmware)
-3. If OTA cannot connect, check the current IP, TCP port and credentials from the installed build. ESPHome safe mode can accept an OTA correction after repeated boot failures if the network and OTA are reachable. If OTA is unavailable, use the known-good CBU image and the serial instructions below. [ESPHome safe mode](https://esphome.io/components/safe_mode/)
-
-The OTA path above was checked against the project YAML, reference ESPHome source and LibreTiny's CBU specification. An end-to-end OTA update on this projector is still to be verified.
+A projector still running the BlissLights factory firmware uses the USB-UART procedure below for its first ESPHome installation. Once ESPHome with native OTA is installed, both ESPHome version updates and changes to the private YAML can be installed over Wi-Fi. Both use a compiled firmware image. [Choose an update path and follow the OTA steps](ota.md)
 
 > [!WARNING]
 > For serial flashing, disconnect all power before opening or rewiring the projector. Electrically unplug the laser before powering the opened device or flashing firmware over UART. [Power and laser safety](#power-supply---required)
@@ -177,7 +140,7 @@ Keep the laser disconnected throughout open-enclosure checks.
 
 1. **Wi-Fi.** Keep the configured **2.4 GHz** network available. Look for a **currently connected** projector and its current IP in the router. A saved router entry alone is insufficient. Use the router and encrypted API to confirm connection rather than relying on a fixed boot time.
 2. **Encrypted API.** Connect with the key from the matching private YAML. Compare the reported firmware version and build time with the intended build when available. [Home Assistant connection guide](connect.md)
-3. **Projector functions.** Test RGBW, motor and button separately. Treat a deliberate power-cycle test, repeated starts, OTA and longer observation as separate checks. Reconnect the laser only with power disconnected and for operation with the enclosure closed.
+3. **Projector functions.** Test RGBW, motor and button separately. Treat a deliberate power-cycle test, repeated starts, [OTA](ota.md) and longer observation as separate checks. Reconnect the laser only with power disconnected and for operation with the enclosure closed.
 
 ### Serial and API logging
 
