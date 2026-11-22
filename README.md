@@ -19,6 +19,8 @@ An independent ESPHome project for the BlissLights Evolve **SKY-EVOLVE-B-RCWB** 
 2. <img src="images/ltchiptool-icon.png" width="24" height="24" alt="">&nbsp;&nbsp; **Install and verify with ltchiptool.** Read the flashing and safety instructions before opening the projector. [Flashing guide](docs/flash.md)
 3. <img src="images/home-assistant-logo.svg" width="24" height="24" alt="">&nbsp;&nbsp; **Connect to Home Assistant.** Add the projector through the ESPHome integration. Start here if ESPHome is already installed. [Connection guide](docs/connect.md)
 
+Already running ESPHome? See how to build, upload and verify an update over Wi-Fi. [OTA update guide](docs/flash.md#update-over-wi-fi-ota)
+
 ## Reference
 
 - GPIO assignments, adapter connections and PCB photographs. [Hardware and UART wiring](docs/wiring.md)
