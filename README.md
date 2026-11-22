@@ -9,6 +9,8 @@
 
 An independent ESPHome project for the BlissLights Evolve **SKY-EVOLVE-B-RCWB** with a **Tuya CBU (BK7231N)** module. It lets you control the RGBW nebula, laser and rotation over your local network using Home Assistant.
 
+**Android app in development.** I’m building a companion app for anyone who wants to control the projector directly over their local network without setting up Home Assistant.
+
 <img src="images/galaxy-evolve.png" alt="BlissLights Evolve projector" width="680">
 
 ## Get started
