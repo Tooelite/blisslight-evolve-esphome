@@ -81,7 +81,7 @@ ltchiptool uf2 info "$UF2"
 sha256sum "$UF2"
 ```
 
-Stop if the file is missing or any check fails. Require a recognized UF2, family **BK7231N**, board **cbu** and LibreTiny **1.14.0** metadata. Compare the SHA-256 against the value recorded for this exact private build or backup; merely printing a hash does not establish that it is the intended image. Do not rebuild or replace the file between this check and writing. Both ltchiptool commands above inspect the file without contacting the device.
+Stop if the file is missing or any check fails. Require a recognized UF2 with family **BK7231N** and board **cbu**. Check that the LibreTiny version in its metadata matches the version recorded for the intended build. Compare the SHA-256 against the value recorded for this exact private build or backup; merely printing a hash does not establish that it is the intended image. Do not rebuild or replace the file between this check and writing. Both ltchiptool commands above inspect the file without contacting the device.
 
 ### Write and verify the transfer
 

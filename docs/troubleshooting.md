@@ -1,6 +1,6 @@
 # Operational checks
 
-Use the [current build instructions](build.md) and the pinned ESPHome commit. Keep the projector on its original power supply and follow the [illustrated UART wiring](wiring.md).
+Identify the ESPHome version used for the installed firmware. The build guide documents the reference commit and the checks for using a newer version. Keep the projector on its original power supply and follow the UART wiring guide. [Build instructions](build.md) · [Illustrated UART wiring](wiring.md)
 
 ## Confirm the running firmware
 
