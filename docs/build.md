@@ -4,6 +4,8 @@ Build the ESPHome UF2 for the BlissLights Evolve with a **Tuya CBU / BK7231N** m
 
 [ESPHome setup](#install-esphome-for-the-reference-build) · [ltchiptool setup](#install-ltchiptool-for-image-inspection-and-serial-flashing) · [Private configuration](#create-the-private-configuration) · [Build](#validate-and-compile) · [UF2 checks](#inspect-and-record-the-image-before-flashing)
 
+You can build the firmware from the command line with `esphome compile` or use the graphical ESPHome Device Builder. The Device Builder is available through ESPHome Desktop, Home Assistant OS, or Docker. [ESPHome installation options](https://esphome.io/install/)
+
 ## Reference toolchain
 
 When I created this repository, I built the configuration with the versions below. The ESPHome commit is an **optional reference** for reproducing that build. [Upstream platform update](https://github.com/esphome/esphome/pull/21531)
