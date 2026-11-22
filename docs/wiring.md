@@ -50,7 +50,9 @@ A solderless breadboard lets you join jumper wires temporarily by plugging them 
 
 ### Choose the jumper wires
 
-Dupont jumper wires are short leads commonly sold for 2.54 mm headers and breadboards. A **male** end has an exposed metal pin that plugs into a breadboard. A **female** end has a socket that slips over a header pin.
+Dupont jumper wires are short, reusable leads. They are common in prototypes and temporary test setups because the 2.54 mm versions fit standard breadboards and pin headers like the one on the FT232 adapter. You can plug in, move or remove the wires at those points by hand, without soldering. That makes it easy to remove the adapter after flashing.
+
+A **male** end has an exposed metal pin that plugs into a breadboard. A **female** end has a socket that slips over a header pin.
 
 | Jumper wire | Where to use it |
 | --- | --- |
