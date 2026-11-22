@@ -6,6 +6,11 @@ The commit is an optional reference for reproducing the original build. Newer ES
 
 ## Install ESPHome for the reference build
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../images/esphome-logo-on-dark.svg">
+  <img src="../images/esphome-logo-on-light.svg" alt="ESPHome" width="144">
+</picture>
+
 Requirements: Linux, Git, Python **3.12–3.15** with `venv`/`pip`, Internet access and enough space for the toolchain. From the repository root:
 
 ```bash
@@ -25,6 +30,8 @@ To verify the reference installation, check its source commit (expected: `602cbf
 ```
 
 ## Install ltchiptool for image inspection and serial flashing
+
+<img src="../images/ltchiptool-icon.png" alt="ltchiptool" width="48" height="48">
 
 ESPHome compiles the firmware. **ltchiptool** inspects the resulting image and writes it over the USB-UART adapter; it is not another build system. This guide uses **ltchiptool 4.15.0**. Its version is independent of the LibreTiny version used by ESPHome.
 

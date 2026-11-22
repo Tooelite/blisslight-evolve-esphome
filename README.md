@@ -16,8 +16,8 @@ An independent ESPHome project for the BlissLights Evolve **SKY-EVOLVE-B-RCWB** 
 ## Get started
 
 1. **Build the firmware.** Follow the guide to prepare your private configuration and build the firmware. [Build guide](docs/build.md)
-2. **Install and verify.** Read the flashing and safety instructions before opening the projector. [Flashing guide](docs/flash.md)
-3. **Connect to Home Assistant.** Add the projector through the ESPHome integration. Start here if ESPHome is already installed. [Connection guide](docs/connect.md)
+2. <img src="images/ltchiptool-icon.png" width="24" height="24" alt="">&nbsp;&nbsp; **Install and verify with ltchiptool.** Read the flashing and safety instructions before opening the projector. [Flashing guide](docs/flash.md)
+3. <img src="images/home-assistant-logo.svg" width="24" height="24" alt="">&nbsp;&nbsp; **Connect to Home Assistant.** Add the projector through the ESPHome integration. Start here if ESPHome is already installed. [Connection guide](docs/connect.md)
 
 ## Reference
 
@@ -36,4 +36,6 @@ Third-party material retains its own terms. This includes the configuration cont
 
 [Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html) provided the ESPHome configuration and original firmware reference. [helge1](https://www.elektroda.com/rtvforum/topic3984240.html#21136263) contributed configuration feedback.
 
-The ESPHome logo is a trademark of the Open Home Foundation. [Official ESPHome brand assets](https://github.com/OpenHomeFoundation/brand-assets/tree/main/esphome)
+The ESPHome and Home Assistant logos are trademarks of the Open Home Foundation. [Official brand assets](https://github.com/OpenHomeFoundation/brand-assets)
+
+The ltchiptool icon comes from Kuba Szczodrzyński’s ltchiptool project. [Original icon](https://github.com/libretiny-eu/ltchiptool/blob/f3d3af8dd963008f22a31017be84239b4020c19b/ltchiptool/gui/ltchiptool.ico) · [ltchiptool license](images/ltchiptool-LICENSE.txt)
