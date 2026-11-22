@@ -5,7 +5,7 @@ For the **BlissLights Evolve SKY-EVOLVE-B-RCWB** with the **Tuya CBU / BK7231N**
 > [!WARNING]
 > Disconnect all power before opening or rewiring the projector. Electrically unplug the laser before powering the opened device or flashing firmware. See [power and laser safety](#power-supply---required).
 
-[Preparation](#before-connecting-the-projector) · [Wiring](#wiring) · [Flashing](#flash-sequence) · [First boot](#verify-after-first-boot) · [Troubleshooting](#if-a-step-fails)
+[Preparation](#before-connecting-the-projector) · [Wiring](#wiring) · [Flashing](#flash-sequence) · [CEN reset for the first flash](#cen-reset-for-the-first-flash) · [First boot](#verify-after-first-boot) · [Troubleshooting](#if-a-step-fails)
 
 ## Flashing adapter used
 
@@ -100,9 +100,13 @@ sha256sum "$UF2"
 | Reset / CEN | 12A | No direct FT232 connection |
 | 3V3 | Not connected | Not connected |
 
-Use **10B (GND)** and **12B (CEN)** for the momentary bridge when ltchiptool asks for the reset.
+Use **10B (GND)** and **12B (CEN)** for the momentary bridge while ltchiptool waits for the chip. [Reset bridge diagram](wiring.md#breadboard-reset-connection)
 
 ## Flash sequence
+
+### CEN reset for the first flash
+
+**If the projector is still running the original firmware, use the manual CEN reset in step 3 below.** Start ltchiptool first. Briefly grounding CEN holds the BK7231N in reset. Releasing CEN lets the chip start while ltchiptool is waiting on UART1, so the tool can establish the connection in download mode. [LibreTiny serial flashing reference](https://docs.libretiny.eu/docs/platform/beken-72xx/)
 
 ### Write and verify the transfer
 
