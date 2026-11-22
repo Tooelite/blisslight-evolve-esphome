@@ -36,7 +36,15 @@ Header pin order with USB-A at the bottom: **CTS#, RTS#, RXD, TXD, GND, VCCIO** 
 
 <img src="../images/evolve-pcb-pad-detail.png" alt="Close-up of PCB 3V3, TX, RX, GND and Reset pads" width="560">
 
-The illustrated example connects the PCB solder-side pads to the breadboard as follows; contact positions and wire colors apply only to this layout:
+### Read the breadboard
+
+A solderless breadboard lets you join jumper wires temporarily by plugging them into shared contacts.
+
+- **Read a hole by row and column.** `10B` means row 10, column B. `12B` is two rows farther down in the same column.
+- **Each row has two groups of five connected holes.** A–E form one group and F–J form the other. The center gap separates them. For example, `6A` and `6E` share a contact, while `6F` belongs to the other group.
+- **Leave the red and blue side rails unused.** The wiring below uses only the numbered rows in the A–E group.
+
+The table shows how this example connects the PCB pads to the adapter. The contact positions and wire colors apply to this layout. [Photo of the wired breadboard](#breadboard-reset-connection)
 
 | PCB pad | Breadboard (PCB side) | Breadboard (FT232 side) | FT232 |
 | --- | --- | --- | --- |
@@ -46,7 +54,7 @@ The illustrated example connects the PCB solder-side pads to the breadboard as f
 | Reset / CEN | 12A | 12B for momentary GND bridge | No direct connection |
 | 3V3 | Not connected | Not connected | Not connected |
 
-The A-E contacts within each numbered row are internally connected. Briefly bridge **10B (GND)** to **12B (CEN)** for reset, then remove the bridge.
+During the reset step, briefly bridge **10B (GND)** to **12B (CEN)** and remove the bridge.
 
 ## Breadboard reset connection
 
