@@ -1,8 +1,20 @@
 # Build the current firmware
 
-When I created this repository, I built [`galaxy-evolve-v0.3-dev.yaml`](../firmware/esphome/galaxy-evolve-v0.3-dev.yaml) with ESPHome commit **`602cbff184c105be128a01f8d61994407988a914`** (`2026.12.0-dev`). That build used the upstream defaults of LibreTiny 1.14.0 and Beken BDK 3.0.78 for CBU/BK7231N. [Upstream platform update](https://github.com/esphome/esphome/pull/21531)
+Build the ESPHome UF2 for the BlissLights Evolve with a **Tuya CBU / BK7231N** module. [Firmware template](../firmware/esphome/galaxy-evolve-v0.3-dev.yaml)
 
-The commit is an optional reference for reproducing the original build. Newer ESPHome releases or development revisions may also work. If you choose another version, use a Python version it supports, validate and compile your private YAML, then inspect the resulting UF2 before flashing.
+[ESPHome setup](#install-esphome-for-the-reference-build) · [ltchiptool setup](#install-ltchiptool-for-image-inspection-and-serial-flashing) · [Private configuration](#create-the-private-configuration) · [Build](#validate-and-compile) · [UF2 checks](#inspect-and-record-the-image-before-flashing)
+
+## Reference toolchain
+
+When I created this repository, I built the configuration with the versions below. The ESPHome commit is an **optional reference** for reproducing that build. [Upstream platform update](https://github.com/esphome/esphome/pull/21531)
+
+| Component | Reference version |
+| --- | --- |
+| ESPHome | `2026.12.0-dev`, commit `602cbff184c105be128a01f8d61994407988a914` |
+| LibreTiny | `1.14.0`, selected by ESPHome |
+| Beken BDK | `3.0.78`, selected by ESPHome |
+
+Newer ESPHome releases or development revisions may also work. Use a Python version supported by your chosen ESPHome version. Validate and compile your private YAML, then inspect the resulting UF2 before flashing.
 
 ## Install ESPHome for the reference build
 
@@ -11,7 +23,8 @@ The commit is an optional reference for reproducing the original build. Newer ES
   <img src="../images/esphome-logo-on-light.svg" alt="ESPHome" width="144">
 </picture>
 
-Requirements: Linux, Git, Python **3.12–3.15** with `venv`/`pip`, Internet access and enough space for the toolchain. From the repository root:
+- **Requirements.** Linux, Git, Python **3.12–3.15** with `venv` and `pip`, internet access and space for the toolchain. The Python range applies to the reference commit.
+- **Installation.** Run these commands from the repository root. They use ESPHome's own build process and keep this environment separate from any desktop installation.
 
 ```bash
 python3 --version
@@ -21,9 +34,7 @@ python3 -m venv .venv-v0.3-dev
 .venv-v0.3-dev/bin/esphome version
 ```
 
-The Python range above applies to the reference commit. The commands use ESPHome’s own build process in an isolated environment. The expected version string is `2026.12.0-dev`. The Git commit identifies the exact revision used in this example.
-
-To verify the reference installation, check its source commit (expected: `602cbff184c105be128a01f8d61994407988a914`):
+Expect version `2026.12.0-dev`. Verify the source commit as well to identify the exact revision. The command below should print `602cbff184c105be128a01f8d61994407988a914`.
 
 ```bash
 .venv-v0.3-dev/bin/python -c 'import importlib.metadata as m, json; print(json.loads(m.distribution("esphome").read_text("direct_url.json"))["vcs_info"]["commit_id"])'
@@ -33,9 +44,11 @@ To verify the reference installation, check its source commit (expected: `602cbf
 
 <img src="../images/ltchiptool-icon.png" alt="ltchiptool" width="48" height="48">
 
-ESPHome compiles the firmware. **ltchiptool** inspects the resulting image and writes it over the USB-UART adapter; it is not another build system. This guide uses **ltchiptool 4.15.0**. Its version is independent of the LibreTiny version used by ESPHome.
+ESPHome compiles the firmware. **ltchiptool** inspects the UF2 and writes it through the USB-UART adapter.
 
-For a fresh Linux/Debian setup, install the CLI in a separate virtual environment from the repository root. The `.venv/` directory is already Git-ignored:
+- **Existing installation.** Reuse a working installation after checking its path and version.
+- **Fresh installation.** From the repository root, set up the CLI in a separate virtual environment under the Git-ignored `.venv/` directory. The CLI is sufficient for all steps in this guide. [Official CLI installation](https://docs.libretiny.eu/docs/flashing/tools/ltchiptool/#installation)
+- **Missing `venv` on Debian.** Install the venv package for your Python version. Run `pip` inside the virtual environment and avoid `sudo pip` on system Python.
 
 ```bash
 python3 -m venv .venv/ltchiptool
@@ -43,9 +56,11 @@ python3 -m venv .venv/ltchiptool
 .venv/ltchiptool/bin/ltchiptool --version
 ```
 
-Expect `ltchiptool v4.15.0`. This follows the [official CLI installation](https://docs.libretiny.eu/docs/flashing/tools/ltchiptool/#installation) with a fixed version and an isolated Python environment. GUI extras are unnecessary for these terminal instructions. If Python reports that `venv` is unavailable, install the Debian venv package matching your Python interpreter before continuing; do not install packages into the system Python with `sudo pip`.
+Expect `ltchiptool v4.15.0`. The pin fixes the CLI release. Its Python dependencies can vary, and ESPHome selects the LibreTiny version independently.
 
-Make this executable available to the `ltchiptool` commands in this guide, [flash.md](flash.md) and [recovery.md](recovery.md):
+### Make ltchiptool available in your terminal
+
+For the installation above, add the executable to `PATH` from the repository root in each new terminal. You can also use its full path. The same executable is used for the remaining build checks, serial flashing and recovery. [Flash guide](flash.md) · [Recovery guide](recovery.md)
 
 ```bash
 export PATH="$PWD/.venv/ltchiptool/bin:$PATH"
@@ -53,9 +68,9 @@ command -v ltchiptool
 ltchiptool --version
 ```
 
-Run this from the repository root in each new terminal, or use the executable's full path instead. If you already have a working installation, check its path and version and reuse it; no reinstall is needed. The version pin fixes the CLI release, not every transitive Python dependency.
-
 ## Create the private configuration
+
+Create a local YAML with restricted permissions. The copy command preserves an existing local file. If you already have one, compare its non-secret settings with the current template and keep its credentials.
 
 ```bash
 umask 077
@@ -63,9 +78,7 @@ cp -n -- firmware/esphome/galaxy-evolve-v0.3-dev.yaml firmware/esphome/galaxy-ev
 chmod 600 firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
 ```
 
-The copy command preserves an existing local file. If one already exists, check its non-secret settings against the current template without overwriting its credentials.
-
-Edit **only the local copy** and replace all five `INSERT_*` values:
+Edit **only the local copy** and fill all five `INSERT_*` placeholders.
 
 | Field | Required value |
 | --- | --- |
@@ -77,25 +90,29 @@ Edit **only the local copy** and replace all five `INSERT_*` values:
 
 Keep the supplied Wi-Fi, logging and GPIO settings. The projector uses its original hardware MAC. [Wi-Fi behavior](troubleshooting.md#wi-fi-connection) · [Logging](troubleshooting.md#logging) · [GPIO assignments](wiring.md#firmware-pin-assignments)
 
-Verify that the private file is ignored and untracked:
+### Check that the private YAML stays out of Git
 
 ```bash
 git check-ignore firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
 git ls-files -- firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
 ```
 
-The first command must report the path; the second must produce no output because the file is not tracked. Do not build or flash with placeholder credentials. Do not print, commit or share the resolved configuration.
+- `git check-ignore` must print the local path.
+- `git ls-files` must return no output for that path. This confirms the private YAML is untracked.
+
+> [!IMPORTANT]
+> Build and flash using the private configuration with real values. Keep the resolved YAML out of terminal output, Git and shared files. Build diagnostics and generated C++ can expose credentials. Review and redact them before sharing. Keep firmware binaries private because they contain credentials.
 
 ## Validate and compile
+
+Use the ESPHome executable from your chosen installation. The commands below show the reference environment. Continue only after **both commands succeed**.
 
 ```bash
 .venv-v0.3-dev/bin/esphome config firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml > /dev/null
 .venv-v0.3-dev/bin/esphome compile firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml
 ```
 
-Use the ESPHome executable from your chosen installation when building with a newer version. Proceed only if validation and compilation both succeed. Build diagnostics and generated C++ may contain credentials. Keep them local and redact them before sharing.
-
-Build directory: `firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/`. Canonical image:
+The build directory is `firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/`. The application image is here.
 
 ```text
 firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
@@ -103,18 +120,24 @@ firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmwa
 
 ## Inspect and record the image before flashing
 
-Check that the generated `platformio.ini` selects board `cbu`. For the reference build, expect LibreTiny `v1.14.0` and `custom_versions.beken-bdk = 3.0.78`. When using a newer ESPHome version, record the versions it actually selects. Use ltchiptool to inspect the exact UF2 you intend to keep and flash. The following commands inspect only the local file.
+1. **Check the target.** In the generated `platformio.ini`, confirm board `cbu`. For the reference build, expect LibreTiny `v1.14.0` and `custom_versions.beken-bdk = 3.0.78`. For a newer ESPHome build, record the versions it actually selects.
+2. **Inspect the exact UF2.** Run these checks on the file you intend to keep and flash. They only read the local file.
 
-```bash
-UF2=firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
-ltchiptool flash file "$UF2"
-ltchiptool uf2 info "$UF2"
-stat -c '%s bytes' "$UF2"
-sha256sum "$UF2"
-```
+   ```bash
+   UF2=firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev/.pioenvs/galaxy-lamp/firmware.uf2
+   ltchiptool flash file "$UF2"
+   ltchiptool uf2 info "$UF2"
+   stat -c '%s bytes' "$UF2"
+   sha256sum "$UF2"
+   ```
 
-`flash file` detects the file format and intended target; despite its name, it does not write flash. `uf2 info` shows the UF2 metadata. Require a recognized UF2 for **BK7231N / CBU** and check that its build metadata matches the toolchain you recorded. Stop on a different target, an unrecognized file or conflicting metadata; do not compensate by guessing raw flash addresses. Metadata inspection alone does not prove that the device will boot or connect.
+   | Check | Result |
+   | --- | --- |
+   | `ltchiptool flash file` | Identifies the file format and target. It performs a file inspection. |
+   | `ltchiptool uf2 info` | Displays the UF2 metadata. |
+   | `stat` and `sha256sum` | Report the exact byte size and SHA-256 of this image. |
 
-Record the image path, byte size, SHA-256, ESPHome version, LibreTiny version, Beken BDK version and ltchiptool version with your private backup. If you installed ESPHome from Git, record the source commit as well. A new build can have a different hash because it embeds credentials and build information; do not substitute a hash from someone else's build.
+3. **Check the results.** Require a recognized UF2 for **BK7231N / CBU** with metadata matching the toolchain you recorded. Stop on an unknown file format, a different target or conflicting metadata. Use the layout supplied by the verified UF2 and leave raw flash offsets to the tool. Boot and connectivity are checked after flashing.
+4. **Back up the image and its record.** Keep the exact UF2, image path, byte size, SHA-256 and versions of ESPHome, LibreTiny, Beken BDK and ltchiptool with your private backup. For an ESPHome installation from Git, also record its commit. Credentials and build information can change the hash even with the reference commit fixed. Use the hash for your own exact image.
 
-Back up the exact image and its hash before [flashing](flash.md). That guide covers serial-port identification, original power supply, disconnected laser, wiring, CEN handshake and the write command. Building or inspecting an image does not flash the device. Binaries contain credentials and must not be published. The documented reference procedure fixes the ESPHome source commit. Build hashes can still differ.
+Building and inspecting the image are local operations. When the backup and checks are complete, use the flashing guide for serial-port identification, original power supply, laser disconnection, wiring, the CEN handshake and the write command. [Flashing guide](flash.md)
