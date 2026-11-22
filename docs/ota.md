@@ -51,5 +51,3 @@ UF2=/path/to/checked/firmware.uf2
 - **Authentication error.** Use the credentials of the running firmware. For a password change, follow the [ESPHome migration steps](https://esphome.io/components/ota/esphome/#updating-the-password).
 - **Image or flash-layout error.** Recheck the exact UF2, board `cbu` and framework versions before retrying. [UF2 checks](build.md#inspect-and-record-the-image-before-flashing)
 - **Repeated restarts.** If ESPHome safe mode starts and OTA is reachable, upload a known-good CBU image. If OTA is unavailable, use UART. [ESPHome safe mode](https://esphome.io/components/safe_mode/) · [UART instructions](flash.md#before-connecting-the-projector)
-
-The reference path was checked against the project YAML, ESPHome's CLI and upload implementation, and LibreTiny's flash layout. An end-to-end OTA update on a physical Evolve is still to be verified.
