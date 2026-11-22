@@ -14,6 +14,6 @@ Compatibility and successful restoration of this reference dump are not guarante
 
 Thanks to **[Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html)** for sharing the dump.
 
-**Caution:** A complete raw restore overwrites the bootloader and all storage, including device-specific settings. The CRC-stripped application size `0xDEAC0` is **not** the raw-image flash length `0x200000`.
+**Caution:** A complete raw restore overwrites the bootloader and all storage, including device-specific settings.
 
 See [the recovery procedure](../../docs/recovery.md).

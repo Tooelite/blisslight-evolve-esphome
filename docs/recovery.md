@@ -1,22 +1,11 @@
 # Restore the complete original firmware
 
-This procedure restores a **complete, unmodified 2 MiB raw flash dump** from another BlissLights Evolve (Tuya CBU / BK7231N). This file is **not** a UF2 application image. Restoration of this reference dump is not guaranteed across hardware revisions; this procedure is only for recovering the original firmware.
+This procedure restores the original firmware from a complete **2 MiB raw flash dump** of another BlissLights Evolve with a Tuya CBU / BK7231N module. Compatibility depends on the hardware revision. [Archive, source and checksums](../firmware/recovery/README.md)
 
-**Warning:** Disconnect the laser module electrically before powering the opened device or flashing, as described in [flash safety](flash.md). A complete restore replaces the bootloader, firmware, device identity, stored settings and potentially calibration data. The reference image comes from another device and may not work on every hardware revision. Verify the target and source before writing.
+> [!WARNING]
+> Disconnect the laser module before powering the opened projector or flashing. A full restore overwrites the bootloader, firmware and device-specific data, including stored settings and potentially calibration. Use a backup from your own projector when available. [Flash safety](flash.md#disconnect-the-laser)
 
-## Reference firmware
-
-| Property | Value |
-| --- | --- |
-| Archive | `firmware/recovery/evolve-reference-firmware-bk7231n-v1.0.tar.gz` |
-| Original BIN | `readResult_BK7231N_QIO_bliss_2023-14-6--12-56-58.bin` |
-| Raw size | **2,097,152 bytes (`0x200000`)** |
-| Raw SHA-256 | `07a76fa01817d4924cebe72b3ebfe789a86bdb3c94418d7570baaf10e1b58da0` |
-| Archive SHA-256 | `2665124ef072fe579b4f38f85e39352cd08a35a0b71167b4706e0e39b40b6d37` |
-
-The dump contains a CRC-valid bootloader RBL header at `0x10F9A`, an application scan from `0x11000`, and Tuya storage from `0x1EE000`. The analyzer's value **`0xDEAC0` is a CRC-stripped application payload length, not a flash-write length**. Do not crop the raw file, shift its addresses or flash the extracted application data in place of the complete BIN.
-
-Thanks to **[Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html)** for providing the firmware dump.
+The dump includes a CRC-valid bootloader RBL header at `0x10F9A`, an application scan from `0x11000` and Tuya storage data from `0x1EE000`. Write the complete raw BIN at offset zero. The CRC-stripped application length `0xDEAC0` is not the raw-image write length.
 
 ## 1. Extract and verify
 

@@ -95,17 +95,7 @@ sha256sum "$UF2"
 
 1. Check that the adapter jumper selects **3V3** and verify the UART voltage is **3.3 V**.
 2. Disconnect all power. Confirm the laser is unplugged and remove any FT232 TXD–RXD loopback wire.
-3. Wire the disconnected projector and adapter as shown. A–E contacts in each numbered breadboard row are internally connected. [PCB photographs, breadboard layout and jumper wires](wiring.md#pcb-connections)
-
-| PCB pad | PCB wire to breadboard | FT232 wire from breadboard |
-| --- | --- | --- |
-| RX | 6A (red) | 6E to TXD |
-| TX | 8A (brown/gray) | 8E to RXD |
-| GND | 10A (black) | 10E to GND |
-| Reset / CEN | 12A | No direct FT232 connection |
-| 3V3 | Not connected | Not connected |
-
-Use **10B (GND)** and **12B (CEN)** for the momentary bridge while ltchiptool waits for the chip. [Reset bridge diagram](wiring.md#breadboard-reset-connection)
+3. Connect the projector and adapter using the wiring table. [Breadboard wiring table](wiring.md#example-wiring) · [PCB photographs and jumper wires](wiring.md#pcb-connections)
 
 ## Flash sequence
 

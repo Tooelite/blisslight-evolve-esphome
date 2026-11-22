@@ -11,6 +11,6 @@ Use this guide once the projector is running ESPHome and connected to your local
 
 ## Browser access and the fallback network
 
-The supplied configuration has no `web_server`, so the projector's normal network address does not offer a browser control page. The captive portal on the fallback access point is for Wi-Fi setup.
+The supplied configuration has no `web_server`, so the projector's normal network address does not offer a browser control page. The captive portal on the fallback access point supports Wi-Fi setup and firmware recovery. [Fallback recovery instructions](ota.md#recover-through-the-fallback-access-point)
 
 If the router shows a saved device entry but the integration cannot connect, check the current Wi-Fi and API status. [Troubleshooting](troubleshooting.md#confirm-the-running-firmware)

@@ -22,7 +22,7 @@ Paths 2 and 3 use the same OTA procedure once native ESPHome OTA is enabled and 
 
 - **Connection.** Find the projector's current IP in the router or through the ESPHome integration. Keep the enclosure closed and the original power supply and 2.4 GHz Wi-Fi available. The CLI connects over the local network. [Confirm the running firmware](troubleshooting.md#confirm-the-running-firmware)
 - **OTA port.** Check the YAML used for the installed firmware. The supplied template enables native ESPHome OTA on the BK7231N default port, **TCP 8892**. [Project YAML](../firmware/esphome/galaxy-evolve-v0.3-dev.yaml#L20-L45) · [ESPHome OTA settings](https://esphome.io/components/ota/esphome/#configuration-variables)
-- **Credentials.** Connect using the OTA settings of the running firmware. The template has a separate OTA password and API encryption key. For the first test, keep the installed Wi-Fi and credentials in the new build. [Changing the OTA password](https://esphome.io/components/ota/esphome/#updating-the-password)
+- **Credentials.** Connect using the OTA settings of the running firmware. The template has a separate OTA password and API encryption key. Keep the installed Wi-Fi and OTA settings in the new build unless you intend to change them. [Changing the OTA password](https://esphome.io/components/ota/esphome/#updating-the-password)
 - **Images.** Keep the previous working CBU image and its private YAML for recovery. Inspect the UF2 you intend to upload, whether built in the CLI or downloaded from Device Builder. [Build options and UF2 checks](build.md) · [Device Builder download](https://docs.libretiny.eu/docs/projects/esphome/#build-upload)
 
 ## Upload the checked UF2
@@ -50,4 +50,14 @@ UF2=/path/to/checked/firmware.uf2
 - **Timeout or connection refused.** Check the current IP, the OTA port from the installed build and local network reachability.
 - **Authentication error.** Use the credentials of the running firmware. For a password change, follow the [ESPHome migration steps](https://esphome.io/components/ota/esphome/#updating-the-password).
 - **Image or flash-layout error.** Recheck the exact UF2, board `cbu` and framework versions before retrying. [UF2 checks](build.md#inspect-and-record-the-image-before-flashing)
-- **Repeated restarts.** If ESPHome safe mode starts and OTA is reachable, upload a known-good CBU image. If OTA is unavailable, use UART. [ESPHome safe mode](https://esphome.io/components/safe_mode/) · [UART instructions](flash.md#before-connecting-the-projector)
+- **Repeated restarts.** If ESPHome safe mode starts and native OTA is reachable, upload a known-good CBU image. [ESPHome safe mode](https://esphome.io/components/safe_mode/)
+
+### Recover through the fallback access point
+
+If the projector cannot join your Wi-Fi and its fallback access point appears, use the captive portal. The supplied YAML names this network `Galaxy-Evolve`.
+
+1. Join the fallback network using the `wifi.ap.password` from the installed configuration.
+2. Open the captive portal. If it does not open automatically, browse to `http://192.168.4.1/`.
+3. Upload the checked `cbu` UF2 using the firmware upload field. Keep power connected through the restart, then verify that the projector rejoins Wi-Fi. [ESPHome captive portal](https://esphome.io/components/captive_portal/) · [LibreTiny UF2 uploads](https://docs.libretiny.eu/docs/flashing/esphome/)
+
+If both network update paths are unavailable, restore a known-good CBU image over UART. [UART instructions](flash.md#before-connecting-the-projector)

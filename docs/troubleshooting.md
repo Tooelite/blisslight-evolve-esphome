@@ -1,6 +1,6 @@
 # Operational checks
 
-Identify the ESPHome version used for the installed firmware. The build guide documents the reference commit and the checks for using a newer version. Keep the projector on its original power supply and follow the UART wiring guide. [Build instructions](build.md) · [Illustrated UART wiring](wiring.md)
+Identify the ESPHome version used for the installed firmware. The build guide documents the reference commit and the checks for using a newer version. For checks after installation, see the flashing guide. [Build instructions](build.md) · [First-boot checks](flash.md#verify-after-first-boot)
 
 ## Confirm the running firmware
 
@@ -21,25 +21,41 @@ logger:
   baud_rate: 0
 ```
 
-For a separate diagnostic build, replace the logger block **in a private copy** with:
+### Build and read UART logs
 
-```yaml
-logger:
-  hardware_uart: UART1
-  baud_rate: 115200
-  level: DEBUG
-```
+1. From the repository root, copy the private configuration. This leaves the regular build settings available for reinstalling later.
 
-First validate and compile this private diagnostic configuration using [the build guide](build.md). It must then be flashed after a separate explicit device-flash decision. Editing the YAML or running `esphome logs` cannot enable logging in the already installed No-Log firmware.
+   ```bash
+   DIAG_CONFIG=firmware/esphome/galaxy-evolve-v0.3-dev.diagnostic.local.yaml
+   umask 077
+   if [ ! -e "$DIAG_CONFIG" ]; then
+     cp -- firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml "$DIAG_CONFIG"
+   fi
+   chmod 600 "$DIAG_CONFIG"
+   ```
 
-After that diagnostic firmware is installed, UART1 is available on the illustrated PCB TX/RX pads. Use the installed official CLI:
+2. In the diagnostic copy, set `esphome.build_path` to `build/galaxy-lamp-v0.3-dev-diagnostic`. Keep the other `esphome` settings. Replace the `logger` block with:
 
-```bash
-.venv-v0.3-dev/bin/esphome logs firmware/esphome/galaxy-evolve-v0.3-dev.local.yaml --device /dev/ttyUSB0
-```
+   ```yaml
+   logger:
+     hardware_uart: UART1
+     baud_rate: 115200
+     level: DEBUG
+   ```
 
-Use the actual adapter port. Logs can expose credentials; keep them private. Return to the supplied disabled-logging configuration after the diagnostic result is recorded.
+3. Validate and compile that copy. Use the same ESPHome environment as for the regular build. [Build guide](build.md#validate-and-compile)
 
-## Verification boundaries
+   ```bash
+   .venv-v0.3-dev/bin/esphome config "$DIAG_CONFIG" > /dev/null
+   .venv-v0.3-dev/bin/esphome compile "$DIAG_CONFIG"
+   ```
 
-Verify Wi-Fi, encrypted API device-info, repeated starts, long-term stability, [OTA](ota.md) and projector functions on the target device before treating them as validated. Keep the laser disconnected while the enclosure is open; do not reconnect it to diagnose Wi-Fi.
+4. Inspect and install the diagnostic UF2 from `firmware/esphome/.esphome/build/galaxy-lamp-v0.3-dev-diagnostic/.pioenvs/galaxy-lamp/firmware.uf2`. Use this file as `UF2` in the flashing guide. Keep the laser disconnected while the enclosure is open. [Serial flashing guide](flash.md#check-the-exact-image) · [UART wiring](wiring.md#pcb-connections)
+5. With the diagnostic firmware running, read UART1 logs using the same diagnostic YAML. Set `PORT` to the actual adapter port.
+
+   ```bash
+   PORT=/dev/ttyUSB0
+   .venv-v0.3-dev/bin/esphome logs "$DIAG_CONFIG" --device "$PORT"
+   ```
+
+Keep logs private because they can contain credentials. Reinstall the regular UF2 to turn logging off again.
