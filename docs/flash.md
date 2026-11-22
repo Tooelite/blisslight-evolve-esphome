@@ -6,7 +6,8 @@ For the **BlissLights Evolve SKY-EVOLVE-B-RCWB** with the **Tuya CBU / BK7231N**
 
 ## Update over Wi-Fi (OTA)
 
-A projector still running the BlissLights factory firmware uses the USB-UART procedure below for its first ESPHome installation. Once ESPHome with native OTA is installed, both ESPHome version updates and changes to the private YAML can be installed over Wi-Fi. Both use a compiled firmware image. [Choose an update path and follow the OTA steps](ota.md)
+- **First ESPHome installation.** Use the USB-UART procedure below.
+- **ESPHome with native OTA already installed.** Send a compiled image over Wi-Fi for a version update or a YAML change. [OTA update guide](ota.md)
 
 > [!WARNING]
 > For serial flashing, disconnect all power before opening or rewiring the projector. Electrically unplug the laser before powering the opened device or flashing firmware over UART. [Power and laser safety](#power-supply---required)
