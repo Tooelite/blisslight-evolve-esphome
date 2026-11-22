@@ -1,5 +1,12 @@
 # ESPHome for BlissLights Evolve
 
+<a href="https://esphome.io/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/esphome-logo-on-dark.svg">
+    <img src="images/esphome-logo-on-light.svg" alt="ESPHome" width="160">
+  </picture>
+</a>
+
 An independent ESPHome project for the BlissLights Evolve **SKY-EVOLVE-B-RCWB** with a **Tuya CBU (BK7231N)** module. It lets you control the RGBW nebula, laser and rotation over your local network using Home Assistant.
 
 <img src="images/galaxy-evolve.png" alt="BlissLights Evolve projector" width="680">
@@ -20,3 +27,5 @@ An independent ESPHome project for the BlissLights Evolve **SKY-EVOLVE-B-RCWB** 
 ## Credits
 
 [Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html) provided the ESPHome configuration and original firmware reference. [helge1](https://www.elektroda.com/rtvforum/topic3984240.html#21136263) contributed configuration feedback.
+
+The ESPHome logo is a trademark of the Open Home Foundation. [Official ESPHome brand assets](https://github.com/OpenHomeFoundation/brand-assets/tree/main/esphome)
