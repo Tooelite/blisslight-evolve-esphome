@@ -38,13 +38,31 @@ Header pin order with USB-A at the bottom: **CTS#, RTS#, RXD, TXD, GND, VCCIO** 
 
 ### Read the breadboard
 
-A solderless breadboard lets you join jumper wires temporarily by plugging them into shared contacts.
+A solderless breadboard lets you join jumper wires temporarily by plugging them into shared contacts. The example below has 400 holes. Its underside shows the metal strips that connect the holes.
+
+<img src="../images/breadboard-400-tie-points.png" alt="Top and underside of a 400-hole breadboard, with numbered rows on the top and the metal contact strips visible underneath" width="600">
+
+*Breadboard photo by Guhuru.* [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Breadboard.png) · [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)
 
 - **Read a hole by row and column.** `10B` means row 10, column B. `12B` is two rows farther down in the same column.
 - **Each row has two groups of five connected holes.** A–E form one group and F–J form the other. The center gap separates them. For example, `6A` and `6E` share a contact, while `6F` belongs to the other group.
 - **Leave the red and blue side rails unused.** The wiring below uses only the numbered rows in the A–E group.
 
-The table shows how this example connects the PCB pads to the adapter. The contact positions and wire colors apply to this layout. [Photo of the wired breadboard](#breadboard-reset-connection)
+### Choose the jumper wires
+
+Dupont jumper wires are short leads commonly sold for 2.54 mm headers and breadboards. A **male** end has an exposed metal pin that plugs into a breadboard. A **female** end has a socket that slips over a header pin.
+
+| Jumper wire | Where to use it |
+| --- | --- |
+| Male–female (M–F) | Use three for **TXD**, **RXD** and **GND**. Push each female socket onto the corresponding FT232 header pin and plug the male end into the matching breadboard hole in the table below. |
+| Male–male (M–M) | Use one as the temporary **GND-to-CEN** reset bridge between `10B` and `12B`. |
+| Female–female (F–F) | Joins two exposed header pins. The breadboard connections in this layout need a male end. |
+
+The projector PCB has bare solder pads at these points. Use securely attached leads from **RX**, **TX**, **GND** and **CEN**, with a pin or solid wire end that fits the breadboard. If the PCB already has a male header fitted at those pads, use male–female jumpers there as well. Follow the signal labels when placing the wires. The colors in the table only help identify the wires in this example.
+
+### Example wiring
+
+Use the numbered breadboard rows to join each PCB lead to its matching adapter wire. [Breadboard wiring and reset diagram](#breadboard-reset-connection)
 
 | PCB pad | Breadboard (PCB side) | Breadboard (FT232 side) | FT232 |
 | --- | --- | --- | --- |
@@ -60,8 +78,7 @@ During the reset step, briefly bridge **10B (GND)** to **12B (CEN)** and remove 
 
 <img src="../images/waveshare-breadboard-reset.png" alt="Breadboard UART and CEN reset wiring" width="680">
 
-In the illustrated breadboard layout, rows A-E are internally connected. **10B is GND** and **12A carries CEN**. Briefly bridge **10B to 12B** to reset the BK7231N, then remove the bridge.
-
+In the diagram, **10B shares GND with 10A**, and **12B shares CEN with 12A**. Use the male–male jumper to make the brief reset bridge shown above.
 
 ## Firmware pin assignments
 

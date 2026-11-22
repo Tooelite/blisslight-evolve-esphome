@@ -90,7 +90,7 @@ sha256sum "$UF2"
 
 1. Check that the adapter jumper selects **3V3** and verify the UART voltage is **3.3 V**.
 2. Disconnect all power. Confirm the laser is unplugged and remove any FT232 TXD–RXD loopback wire.
-3. Wire the disconnected projector and adapter as shown. A–E contacts in each numbered breadboard row are internally connected. [PCB photographs and breadboard layout](wiring.md#pcb-connections)
+3. Wire the disconnected projector and adapter as shown. A–E contacts in each numbered breadboard row are internally connected. [PCB photographs, breadboard layout and jumper wires](wiring.md#pcb-connections)
 
 | PCB pad | PCB wire to breadboard | FT232 wire from breadboard |
 | --- | --- | --- |
