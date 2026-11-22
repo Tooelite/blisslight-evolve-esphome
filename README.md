@@ -26,6 +26,12 @@ An independent ESPHome project for the BlissLights Evolve **SKY-EVOLVE-B-RCWB** 
 - Restore the original firmware from a complete raw flash image. [Recovery guide](docs/recovery.md)
 - Review firmware changes by version. [Changelog](CHANGELOG.md)
 
+## License
+
+The [MIT License](LICENSE) applies to Tooelite's original contributions to the ESPHome configuration and documentation in this repository.
+
+Third-party material retains its own terms. This includes the configuration contributed by Dawk323, the original firmware archive in `firmware/recovery/`, the ESPHome logos and other third-party images.
+
 ## Credits
 
 [Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html) provided the ESPHome configuration and original firmware reference. [helge1](https://www.elektroda.com/rtvforum/topic3984240.html#21136263) contributed configuration feedback.
