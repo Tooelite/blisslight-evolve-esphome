@@ -1,6 +1,14 @@
 # Flash ESPHome firmware
 
-Target: BlissLights Evolve SKY-EVOLVE-B-RCWB (Tuya CBU / BK7231N). Adapter: Waveshare FT232 USB UART Board (Type A, SKU 6170), 3.3 V TTL.
+This guide covers the BlissLights Evolve SKY-EVOLVE-B-RCWB with the Tuya CBU / BK7231N module.
+
+## Flashing adapter used
+
+**Waveshare FT232 USB UART Board (Type A), SKU 6170**, with 3.3 V TTL logic.
+
+<img src="../images/waveshare-6170-ft232-type-a.jpg" alt="Waveshare 6170 FT232 Type A adapter with a USB-A plug and a six-pin UART header" width="460">
+
+*Manufacturer's product photo.* [Waveshare product page](https://www.waveshare.com/ft232-usb-uart-board-type-a.htm)
 
 ## Before connecting the projector
 
