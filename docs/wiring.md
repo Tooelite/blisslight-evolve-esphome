@@ -38,11 +38,11 @@ Header pin order with USB-A at the bottom: **CTS#, RTS#, RXD, TXD, GND, VCCIO** 
 
 ### Read the breadboard
 
-A solderless breadboard lets you join jumper wires temporarily by plugging them into shared contacts. The example below has 400 holes. Its underside shows the metal strips that connect the holes.
+A solderless breadboard lets you join jumper wires temporarily by plugging them into shared contacts. The example below has 400 holes.
 
-<img src="../images/breadboard-400-tie-points.png" alt="Top and underside of a 400-hole breadboard, with numbered rows on the top and the metal contact strips visible underneath" width="600">
+<img src="../images/breadboard-400-tie-points.jpg" alt="White 400-hole breadboard with numbered rows, a center gap, and red and blue side rails" width="600">
 
-*Breadboard photo by Guhuru.* [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Breadboard.png) · [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)
+*BREB-01 by oomlout.* [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:400_points_breadboard.jpg) · [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)
 
 - **Read a hole by row and column.** `10B` means row 10, column B. `12B` is two rows farther down in the same column.
 - **Each row has two groups of five connected holes.** A–E form one group and F–J form the other. The center gap separates them. For example, `6A` and `6E` share a contact, while `6F` belongs to the other group.
