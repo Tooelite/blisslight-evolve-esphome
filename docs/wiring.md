@@ -1,6 +1,6 @@
-# Waveshare FT232 USB UART Board (Type A, SKU 6170)
+# Hardware and UART wiring
 
-USB-A adapter with FT232RL, used for UART1 on the **CBU / BK7231N**. [Manufacturer specifications](https://www.waveshare.com/product/ft232-usb-uart-board-type-a.htm).
+This guide covers the **CBU / BK7231N** board in the BlissLights Evolve. The UART1 instructions use the **Waveshare FT232 USB UART Board (Type A, SKU 6170)**, a USB-A adapter with the FT232RL chip. [Adapter specifications](https://www.waveshare.com/product/ft232-usb-uart-board-type-a.htm)
 
 ## Wiring
 
@@ -54,6 +54,22 @@ The A-E contacts within each numbered row are internally connected. Briefly brid
 
 In the illustrated breadboard layout, rows A-E are internally connected. **10B is GND** and **12A carries CEN**. Briefly bridge **10B to 12B** to reset the BK7231N, then remove the bridge.
 
+
+## Firmware pin assignments
+
+The published configuration uses these CBU / BK7231N pins. [Firmware YAML](../firmware/esphome/galaxy-evolve-v0.3-dev.yaml)
+
+| Function | GPIO |
+| --- | --- |
+| Nebula red | GPIO6 |
+| Nebula green | GPIO26 |
+| Nebula blue | GPIO24 |
+| Nebula white | GPIO9 |
+| Laser | GPIO8 |
+| Motor | GPIO7 |
+| Button | GPIO14 |
+| Status LED | GPIO0 |
+| UART1 RX / TX | GPIO10 / GPIO11 |
 
 ## Adapter check (projector disconnected)
 

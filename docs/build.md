@@ -1,6 +1,6 @@
 # Build the current firmware
 
-Source: [`galaxy-evolve-v0.3-dev.yaml`](../firmware/esphome/galaxy-evolve-v0.3-dev.yaml). Use official ESPHome commit **`602cbff184c105be128a01f8d61994407988a914`** (`2026.12.0-dev`), which selects LibreTiny 1.14.0 and Beken BDK 3.0.78 for CBU/BK7231N. Do not substitute an older installed ESPHome release or add a manual framework pin.
+Build [`galaxy-evolve-v0.3-dev.yaml`](../firmware/esphome/galaxy-evolve-v0.3-dev.yaml) with official ESPHome commit **`602cbff184c105be128a01f8d61994407988a914`** (`2026.12.0-dev`). The configuration inherits the upstream defaults of LibreTiny 1.14.0 and Beken BDK 3.0.78 for CBU/BK7231N. [Upstream platform update](https://github.com/esphome/esphome/pull/21531)
 
 ## Install the pinned official CLI
 
@@ -66,7 +66,7 @@ Edit **only the local copy** and replace all five `INSERT_*` values:
 | `api.encryption.key` | Base64-encoded 32-byte API encryption key |
 | `ota[0].password` | ESPHome OTA password |
 
-Keep `wifi.hidden: true`, the logger settings and the hardware assignments as supplied. No MAC override is required. `hidden: true` controls the device's direct SSID join; leave the router SSID visible if it is already visible.
+Keep the supplied Wi-Fi, logging and GPIO settings. The projector uses its original hardware MAC. [Wi-Fi behavior](troubleshooting.md#wi-fi-connection) · [Logging](troubleshooting.md#logging) · [GPIO assignments](wiring.md#firmware-pin-assignments)
 
 Verify that the private file is ignored and untracked:
 

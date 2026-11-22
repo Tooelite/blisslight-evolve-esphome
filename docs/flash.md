@@ -102,7 +102,7 @@ Require completion with **exit status 0 and no reported write/verification error
 Keep the laser disconnected throughout open-enclosure checks.
 
 1. Check that the router reports a **currently connected** device and its current IP, not just a saved entry. Keep the configured 2.4 GHz network available. Do not assume a fixed boot-to-connection time; confirm connectivity using the router and encrypted API.
-2. Connect through the encrypted ESPHome API, for example using [Home Assistant as described in the README](../README.md#connect-with-home-assistant). Use the API key from the matching private YAML. Where available, compare reported firmware version/build time with the intended build to distinguish it from an old router entry. The firmware does not provide a normal browser control page.
+2. Connect through the encrypted ESPHome API using the key from the matching private YAML. Where available, compare the reported firmware version and build time with the intended build. [Home Assistant connection guide](connect.md)
 3. Test RGBW, motor and button separately. A deliberate power-cycle test, repeated starts, OTA and longer observation are separate checks, not implied by a successful transfer. Reconnect the laser only with power disconnected and for operation with the enclosure closed.
 
 The supplied configuration disables normal ESPHome serial/API logging. An empty serial terminal therefore does not prove that boot failed. BootROM/SDK output is separate and not guaranteed silent. Enabling ESPHome logs requires a separately built and flashed diagnostic configuration; see [operational checks](troubleshooting.md#logging).

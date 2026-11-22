@@ -6,11 +6,20 @@ Use the [current build instructions](build.md) and the pinned ESPHome commit. Ke
 
 Check that the FRITZ!Box or other router reports the projector as **currently connected**, with an IP address. A saved device entry alone is insufficient. An encrypted ESPHome API device-info response can confirm the firmware version, build time and original hardware MAC independently of the router's cached entry.
 
-The supplied configuration uses `wifi.hidden: true` for direct SSID connection. The router SSID need not be hidden. Use a compatible 2.4 GHz network. With multiple access points sharing the SSID, this mode does not perform ESPHome's initial strongest-AP selection.
+## Wi-Fi connection
+
+Use a compatible 2.4 GHz network. The supplied configuration sets `wifi.hidden: true`, which tells ESPHome to connect directly by SSID and skip the initial scan used to select a BSSID and channel. The router can keep broadcasting its SSID. If several access points share the SSID, this mode skips ESPHome's initial scan-based selection of the strongest access point. [ESPHome Wi-Fi documentation](https://esphome.io/components/wifi/#connecting-to-multiple-networks)
 
 ## Logging
 
-The final YAML disables ESPHome logging (`level: NONE`, `boot_log_level: NONE`, `baud_rate: 0`). It therefore does not provide normal ESPHome serial/API logs. BootROM or SDK output is separate and is not guaranteed silent.
+The standard configuration disables normal ESPHome serial and API logging. The BootROM or SDK may still emit output.
+
+```yaml
+logger:
+  level: NONE
+  boot_log_level: NONE
+  baud_rate: 0
+```
 
 For a separate diagnostic build, replace the logger block **in a private copy** with:
 
