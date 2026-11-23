@@ -42,6 +42,8 @@ Third-party material retains its own terms. This includes the configuration cont
 
 [Dawk323](https://www.elektroda.com/rtvforum/topic3984240.html) provided the ESPHome configuration and original firmware reference. [helge1](https://www.elektroda.com/rtvforum/topic3984240.html#21136263) contributed configuration feedback.
 
+The BlissLights and Sky Lite Evolve names identify the hardware covered by this independent project. Rights to the BlissLights branding and original manufacturer firmware remain with their respective holders.
+
 The ESPHome and Home Assistant logos are trademarks of the Open Home Foundation. [Official brand assets](https://github.com/OpenHomeFoundation/brand-assets)
 
 The ltchiptool icon comes from Kuba Szczodrzyński’s ltchiptool project. [Original icon](https://github.com/libretiny-eu/ltchiptool/blob/f3d3af8dd963008f22a31017be84239b4020c19b/ltchiptool/gui/ltchiptool.ico) · [ltchiptool license](images/ltchiptool-LICENSE.txt)
