@@ -12,6 +12,7 @@ An independent ESPHome project for the BlissLights Evolve **SKY-EVOLVE-B-RCWB** 
 [![Project license: MIT](images/badge-license-mit.svg)](LICENSE)
 [![Firmware: ESPHome](images/badge-firmware-esphome.svg)](https://esphome.io/)
 [![Platform: LibreTiny](images/badge-platform-libretiny.svg)](docs/build.md#reference-toolchain)
+[![Hardware: Tuya CBU / BK7231N](images/badge-hardware-bk7231n.svg)](docs/wiring.md)
 
 **Android app in development.** I’m building a companion app for anyone who wants to control the projector directly over their local network without setting up Home Assistant.
 
