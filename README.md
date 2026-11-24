@@ -22,7 +22,7 @@ An independent ESPHome firmware project for local control of star projectors.
 | [BlissLights Sky Lite Evolve](docs/devices/evolve.md) | `SKY-EVOLVE-B-RCWB`, Tuya CBU / BK7231N | Firmware configuration, installation and recovery guides |
 | [Nigecue SK20](docs/devices/sk20.md) | `ST60_Control_Board_V2.4`, Tuya CB3S / BK7231N | Hardware identification |
 
-<img src="images/star-projectors-banner.webp" alt="BlissLights Sky Lite Evolve and Nigecue SK20 projecting a starfield" width="680">
+<img src="images/star-projectors-banner.jpg" alt="BlissLights Sky Lite Evolve and Nigecue SK20 projecting a starfield" width="680">
 
 ## Get started
 
