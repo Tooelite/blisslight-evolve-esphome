@@ -2,6 +2,15 @@
 
 This guide covers the **CBU / BK7231N** board in the BlissLights Evolve. The UART1 instructions use the **Waveshare FT232 USB UART Board (Type A, SKU 6170)**, a USB-A adapter with the FT232RL chip. [Adapter specifications](https://www.waveshare.com/product/ft232-usb-uart-board-type-a.htm)
 
+## Model compatibility
+
+- **Sky Lite Evolve (`SKY-EVOLVE-B-RCWB`).** This repository targets the Evolve with a **Tuya CBU / BK7231N** module. [ESPHome configuration](../firmware/esphome/galaxy-evolve-v0.3-dev.yaml) · [LibreTiny CBU board](https://docs.libretiny.eu/boards/cbu/)
+- **Original Sky Lite (`900-00047_A`, Blue Stars / Blue Cloud).** BlissLights documents local button controls and introduced app control with the Sky Lite 2.0. The first-generation model has no documented Wi-Fi interface. [Model manual](https://manualsfile.com/product/p1l6m5q97ns.html) · [BlissLights model comparison](https://blisslights.com/blogs/blisslights/sky-lite-2-0-vs-evolve-best-galaxy-lights)
+
+Use the **Evolve UF2, UART pinout and raw recovery image only on matching Evolve hardware**. To assess a direct ESPHome port for the original Sky Lite, identify its controller and board revision and check whether ESPHome supports that controller. The model label alone does not provide those details.
+
+An ESPHome smart plug can switch power to the original Sky Lite. Its factory firmware determines what happens at power-up, and the device buttons still control brightness and effects. [Official Sky Lite manual](https://cdn.shopify.com/s/files/1/0336/3763/0092/files/SKYLite_MULTI_additional_languages.pdf?v=1726783836#page=5)
+
 ## Wiring
 
 **Power supply: use the projector's original power adapter.** The Waveshare FT232 USB UART Board (Type A, SKU 6170) cannot supply enough current for the projector PCB. The 3.3 V jumper sets UART logic voltage, not PCB power. **Never connect FT232 VCCIO, 3V3 or 5V to the PCB power pins.** Connect a common GND and crossed TXD/RXD only; use GND briefly for CEN reset. Disconnect all power before changing wiring.

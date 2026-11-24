@@ -1,6 +1,6 @@
 # Flash ESPHome firmware
 
-For the **BlissLights Evolve SKY-EVOLVE-B-RCWB** with the **Tuya CBU / BK7231N** module.
+For the **BlissLights Evolve SKY-EVOLVE-B-RCWB** with the **Tuya CBU / BK7231N** module. [Model compatibility](wiring.md#model-compatibility)
 
 [OTA update](#update-over-wi-fi-ota) · [Serial preparation](#before-connecting-the-projector) · [Wiring](#wiring) · [Serial flashing](#flash-sequence) · [CEN reset](#cen-reset-for-the-first-flash) · [First boot](#verify-after-first-boot) · [Troubleshooting](#if-a-step-fails)
 

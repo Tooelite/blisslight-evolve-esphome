@@ -1,6 +1,6 @@
 # Restore the complete original firmware
 
-This procedure restores the original firmware from a complete **2 MiB raw flash dump** of another BlissLights Evolve with a Tuya CBU / BK7231N module. Compatibility depends on the hardware revision. [Archive, source and checksums](../firmware/recovery/README.md)
+This procedure restores the original firmware from a complete **2 MiB raw flash dump** of another BlissLights Evolve with a Tuya CBU / BK7231N module. Compatibility depends on the hardware revision. [Archive, source and checksums](../firmware/recovery/README.md) · [Model compatibility](wiring.md#model-compatibility)
 
 > [!WARNING]
 > Disconnect the laser module before powering the opened projector or flashing. A full restore overwrites the bootloader, firmware and device-specific data, including stored settings and potentially calibration. Use a backup from your own projector when available. [Flash safety](flash.md#disconnect-the-laser)
