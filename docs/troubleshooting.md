@@ -1,5 +1,7 @@
 # Operational checks
 
+These checks cover the [BlissLights Evolve](devices/evolve.md).
+
 Identify the ESPHome version used for the installed firmware. The build guide documents the reference commit and the checks for using a newer version. For checks after installation, see the flashing guide. [Build instructions](build.md) · [First-boot checks](flash.md#verify-after-first-boot)
 
 ## Confirm the running firmware

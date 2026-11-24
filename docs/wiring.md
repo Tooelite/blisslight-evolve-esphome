@@ -4,12 +4,7 @@ This guide covers the **CBU / BK7231N** board in the BlissLights Evolve. The UAR
 
 ## Model compatibility
 
-- **Sky Lite Evolve (`SKY-EVOLVE-B-RCWB`).** This repository targets the Evolve with a **Tuya CBU / BK7231N** module. [ESPHome configuration](../firmware/esphome/galaxy-evolve-v0.3-dev.yaml) · [LibreTiny CBU board](https://docs.libretiny.eu/boards/cbu/)
-- **Original Sky Lite (`900-00047_A`, Blue Stars / Blue Cloud).** BlissLights documents local button controls and introduced app control with the Sky Lite 2.0. The first-generation model has no documented Wi-Fi interface. [Model manual](https://manualsfile.com/product/p1l6m5q97ns.html) · [BlissLights model comparison](https://blisslights.com/blogs/blisslights/sky-lite-2-0-vs-evolve-best-galaxy-lights)
-
-Use the **Evolve UF2, UART pinout and raw recovery image only on matching Evolve hardware**. To assess a direct ESPHome port for the original Sky Lite, identify its controller and board revision and check whether ESPHome supports that controller. The model label alone does not provide those details.
-
-An ESPHome smart plug can switch power to the original Sky Lite. Its factory firmware determines what happens at power-up, and the device buttons still control brightness and effects. [Official Sky Lite manual](https://cdn.shopify.com/s/files/1/0336/3763/0092/files/SKYLite_MULTI_additional_languages.pdf?v=1726783836#page=5)
+Use the **Evolve UF2, UART pinout and raw recovery image only on matching Evolve hardware**. [Evolve hardware and related models](devices/evolve.md) · [Nigecue SK20 hardware](devices/sk20.md)
 
 ## Wiring
 

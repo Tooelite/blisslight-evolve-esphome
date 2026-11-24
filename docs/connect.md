@@ -1,6 +1,6 @@
 # Connect to Home Assistant
 
-Use this guide once the projector is running ESPHome and connected to your local Wi-Fi. If the projector still needs firmware, start with the [build guide](build.md) and [flashing guide](flash.md).
+Use this guide once your BlissLights Evolve is running ESPHome and connected to your local Wi-Fi. If the projector still needs firmware, start with the [build guide](build.md) and [flashing guide](flash.md).
 
 ## Add the projector
 

@@ -1,4 +1,4 @@
-# ESPHome for BlissLights Evolve
+# ESPHome for star projectors
 
 <a href="https://esphome.io/">
   <picture>
@@ -7,32 +7,34 @@
   </picture>
 </a>
 
-An independent ESPHome project for the BlissLights Evolve **SKY-EVOLVE-B-RCWB** with a **Tuya CBU (BK7231N)** module. It lets you control the RGBW nebula, laser and rotation over your local network using Home Assistant.
+An independent ESPHome firmware project for local control of star projectors.
 
 [![Project license: MIT](images/badge-license-mit.svg)](LICENSE)
 [![Firmware: ESPHome](images/badge-firmware-esphome.svg)](https://esphome.io/)
 [![Platform: LibreTiny](images/badge-platform-libretiny.svg)](docs/build.md#reference-toolchain)
-[![Hardware: Tuya CBU / BK7231N](images/badge-hardware-bk7231n.svg)](docs/wiring.md)
+[![Hardware: Tuya CBU / BK7231N](images/badge-hardware-bk7231n.svg)](docs/devices/evolve.md)
 [![Guide: OTA](images/badge-guide-ota.svg)](docs/ota.md)
+
+## Projectors
+
+| Model | Hardware | What is available |
+| --- | --- | --- |
+| [BlissLights Sky Lite Evolve](docs/devices/evolve.md) | `SKY-EVOLVE-B-RCWB`, Tuya CBU / BK7231N | Firmware configuration, installation and recovery guides |
+| [Nigecue SK20](docs/devices/sk20.md) | `ST60_Control_Board_V2.4`, Tuya CB3S / BK7231N | Hardware identification |
+
+## Get started
+
+The steps below are for the **BlissLights Sky Lite Evolve**. The firmware lets you control the RGBW nebula, laser and rotation over your local network using Home Assistant.
 
 **Android app in development.** I’m building a companion app for anyone who wants to control the projector directly over their local network without setting up Home Assistant.
 
 <img src="images/galaxy-evolve.png" alt="BlissLights Evolve projector" width="680">
-
-## Get started
 
 1. <img src="images/esphome-logomark.svg" width="24" height="24" alt="ESPHome">&nbsp;&nbsp; **Build the firmware.** Follow the guide to prepare your private configuration and build the firmware. [Build guide](docs/build.md)
 2. <img src="images/ltchiptool-icon.png" width="24" height="24" alt="">&nbsp;&nbsp; **Install and verify with ltchiptool.** Read the flashing and safety instructions before opening the projector. [Flashing guide](docs/flash.md)
 3. <img src="images/home-assistant-logo.svg" width="24" height="24" alt="">&nbsp;&nbsp; **Connect to Home Assistant.** Add the projector through the ESPHome integration. Start here if ESPHome is already installed. [Connection guide](docs/connect.md)
 
 Already running ESPHome? See how to build, upload and verify an update over Wi-Fi. [OTA update guide](docs/ota.md)
-
-## Reference
-
-- GPIO assignments, adapter connections and PCB photographs. [Hardware and UART wiring](docs/wiring.md)
-- Wi-Fi, firmware verification and logging. [Troubleshooting](docs/troubleshooting.md)
-- Restore the original firmware from a complete raw flash image. [Recovery guide](docs/recovery.md)
-- Review firmware changes by version. [Changelog](CHANGELOG.md)
 
 ## License
 

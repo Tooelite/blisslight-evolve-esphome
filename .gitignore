@@ -20,8 +20,8 @@ firmware/recovery/*.rbl
 *.key
 *.pem
 
-# Current private ESPHome build and credentials
+# Local ESPHome builds and credentials
 .venv-v0.3-dev/
 .build-logs-v0.3-dev/
-firmware/esphome/*.local.yaml
-firmware/esphome/build-artifacts/
+firmware/esphome/**/*.local.yaml
+firmware/esphome/**/build-artifacts/
