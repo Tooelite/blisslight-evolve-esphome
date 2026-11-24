@@ -22,13 +22,13 @@ An independent ESPHome firmware project for local control of star projectors.
 | [BlissLights Sky Lite Evolve](docs/devices/evolve.md) | `SKY-EVOLVE-B-RCWB`, Tuya CBU / BK7231N | Firmware configuration, installation and recovery guides |
 | [Nigecue SK20](docs/devices/sk20.md) | `ST60_Control_Board_V2.4`, Tuya CB3S / BK7231N | Hardware identification |
 
+<img src="images/star-projectors-banner.webp" alt="BlissLights Sky Lite Evolve and Nigecue SK20 projecting a starfield" width="680">
+
 ## Get started
 
 The steps below are for the **BlissLights Sky Lite Evolve**. The firmware lets you control the RGBW nebula, laser and rotation over your local network using Home Assistant.
 
 **Android app in development.** I’m building a companion app for anyone who wants to control the projector directly over their local network without setting up Home Assistant.
-
-<img src="images/galaxy-evolve.png" alt="BlissLights Evolve projector" width="680">
 
 1. <img src="images/esphome-logomark.svg" width="24" height="24" alt="ESPHome">&nbsp;&nbsp; **Build the firmware.** Follow the guide to prepare your private configuration and build the firmware. [Build guide](docs/build.md)
 2. <img src="images/ltchiptool-icon.png" width="24" height="24" alt="">&nbsp;&nbsp; **Install and verify with ltchiptool.** Read the flashing and safety instructions before opening the projector. [Flashing guide](docs/flash.md)
